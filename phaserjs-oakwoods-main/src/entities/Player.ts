@@ -104,10 +104,19 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const goD = this.cursors.down.isDown || this.wasd.down.isDown;
 
     let vx = 0, vy = 0;
-    if (goL) { vx = -PLAYER_SPEED; this._facing = 'left'; }
-    else if (goR) { vx = PLAYER_SPEED; this._facing = 'right'; }
-    if (goU) { vy = -PLAYER_SPEED; if (!goL && !goR) this._facing = 'up'; }
-    else if (goD) { vy = PLAYER_SPEED; if (!goL && !goR) this._facing = 'down'; }
+    
+    // Set velocity - use else if to prevent conflicting directions
+    if (goL) vx = -PLAYER_SPEED;
+    else if (goR) vx = PLAYER_SPEED;
+    
+    if (goU) vy = -PLAYER_SPEED;
+    else if (goD) vy = PLAYER_SPEED;
+
+    // Determine facing direction - only update when moving
+    if (goU) this._facing = 'up';
+    else if (goD) this._facing = 'down';
+    else if (goL) this._facing = 'left';
+    else if (goR) this._facing = 'right';
 
     // Normalize diagonal
     if (vx !== 0 && vy !== 0) { vx *= 0.707; vy *= 0.707; }
@@ -121,20 +130,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       body.setVelocity(vx, vy);
     }
 
-    // Flip is only used for procedural sprites (real sheet has separate left/right rows)
-    if (!this._hasAnims) {
-      if (goL) this.setFlipX(true);
-      else if (goR) this.setFlipX(false);
-    }
 
-    // Directional walk animation
+    // Directional walk animation — right reuses the left animation flipped
     if (this._hasAnims) {
       const moving = vx !== 0 || vy !== 0;
-      const animKey = `${this._textureKey}-${this._facing}`;
+      const animDir = this._facing === 'right' ? 'left' : this._facing;
+      const animKey = `${this._textureKey}-${animDir}`;
+      this.setFlipX(this._facing === 'right');
       if (moving) {
         if (this.anims.currentAnim?.key !== animKey) this.anims.play(animKey, true);
       } else {
-        this.anims.pause();  // freeze on current frame when idle
+        this.anims.pause();
       }
     }
   }

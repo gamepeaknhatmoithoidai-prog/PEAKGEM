@@ -5,7 +5,7 @@ export const PLAYER_SPEED = 175;
 export const INTERACT_RADIUS = 72;
 
 // Map dimensions
-export const MAP_W_CH1 = 3400;
+export const MAP_W_CH1 = 8000;
 export const MAP_W_CH2 = 2600;
 export const MAP_H = H;
 

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"f:\\\\\\\\SideProject\\\\\\\\PEAKGEM\\\\\\\\phaserjs-oakwoods-main\\\\\\\\assets\\\\\\\\game\")"
+    ]
+  }
+}

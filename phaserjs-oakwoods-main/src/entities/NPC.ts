@@ -113,6 +113,33 @@ export class NPC extends Phaser.GameObjects.Container {
     this.floatTween?.stop();
   }
 
+  /** Walk horizontally to a target x, then stop. */
+  walkTo(targetX: number, speed = 60): void {
+    const dx = targetX - this.x;
+    if (Math.abs(dx) < 1) return;
+    // Side-view walk frames face left → flip for right-bound motion.
+    const goingRight = dx > 0;
+    this.sprite.setFlipX(false);
+
+    const texKey = this.sprite.texture.key;
+    const walkKey = `${texKey}-walk`;
+    if (this.scene.anims.exists(walkKey)) this.sprite.play(walkKey);
+
+    const duration = Math.abs(dx) / speed * 600;
+    this.scene.tweens.add({
+      targets: this,
+      x: targetX,
+      duration,
+      ease: 'Linear',
+      onComplete: () => {
+        this.sprite.stop();
+        // Keep a side-view frame so he doesn't snap back to front-facing.
+        if (this.scene.anims.exists(walkKey)) this.sprite.setFrame(0);
+        this.sprite.setFlipX(goingRight);
+      },
+    });
+  }
+
   /** Gentle idle sway */
   startIdleAnim(): void {
     this.scene.tweens.add({

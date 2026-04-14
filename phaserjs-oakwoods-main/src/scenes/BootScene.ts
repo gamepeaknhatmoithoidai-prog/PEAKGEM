@@ -36,6 +36,7 @@ const IMAGES: { key: string; path: string }[] = [
   { key: 'bg-ch2',    path: 'assets/game/bg-ch2.jpg'    },
   { key: 'bg-forest', path: 'assets/game/bg-forest.jpg' },
   { key: 'bg-scene',  path: 'assets/game/bg-scene.jpg'  },
+  { key: 'caycamlai', path: 'assets/game/Caycamlai.jpg' },
 ];
 
 export class BootScene extends Phaser.Scene {
@@ -99,21 +100,27 @@ export class BootScene extends Phaser.Scene {
       }
     }
 
+    // Walk animation for K'Brơi (side-view, frames 3-5 — same row convention as player)
+    if (!this.anims.exists('npc-kbroi-walk')) {
+      this.anims.create({
+        key: 'npc-kbroi-walk',
+        frames: this.anims.generateFrameNumbers('npc-kbroi', { start: 1, end: 1 }),
+        frameRate: 8,
+        repeat: -1,
+      });
+    }
+
     this.scene.start('CharacterSelectScene');
   }
 
   /**
-   * Creates 4 directional animations for a 3×4 walk spritesheet.
-   * Row 0 = down/front (frames 0-2)
-   * Row 1 = right      (frames 3-5)
-   * Row 2 = left       (frames 6-8)
-   * Row 3 = up/back    (frames 9-11)
+   * Creates directional animations for a 3×4 walk spritesheet.
+   * Row 0 = down, Row 1 = left, Row 3 = up. Right is produced by flipping left.
    */
   private makeWalkAnims(key: string): void {
     const dirs = [
       { name: 'down',  start: 0,  end: 2  },
-      { name: 'left',  start: 3,  end: 5  },   // row 1 = facing left
-      { name: 'right', start: 6,  end: 8  },   // row 2 = facing right
+      { name: 'left',  start: 3,  end: 5  },
       { name: 'up',    start: 9,  end: 11 },
     ] as const;
 

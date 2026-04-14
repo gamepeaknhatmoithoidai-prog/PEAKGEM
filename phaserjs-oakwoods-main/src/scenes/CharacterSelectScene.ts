@@ -76,15 +76,15 @@ export class CharacterSelectScene extends Phaser.Scene {
       fontSize: '15px', fontFamily: 'Arial', color: '#cceeaa',
     }).setOrigin(0.5).setDepth(2);
 
-    const mScl = this.spriteScale('player-m', 130);
-    const fScl = this.spriteScale('player-f', 130);
+    // Use same scale (0.18) as actual player character in gameplay
+    const playerScale = 0.18;
 
     // ── Male card ──────────────────────────────────────────────────
     this.maleBg = this.add.rectangle(W / 2 - 90, 210, 130, 180, 0x1a3a10)
       .setDepth(1).setInteractive({ useHandCursor: true });
 
     this.maleSprite = this.add.image(W / 2 - 90, 200, 'player-m', this.idleFrame('player-m'))
-      .setScale(mScl).setDepth(3);
+      .setScale(playerScale).setDepth(3);
     // FIX: remove white JPG background
     this.removeWhiteBg(this.maleSprite, 'player-m');
 
@@ -97,7 +97,7 @@ export class CharacterSelectScene extends Phaser.Scene {
       .setDepth(1).setInteractive({ useHandCursor: true });
 
     this.femaleSprite = this.add.image(W / 2 + 90, 200, 'player-f', this.idleFrame('player-f'))
-      .setScale(fScl).setDepth(3);
+      .setScale(playerScale).setDepth(3);
     // FIX: remove white JPG background
     this.removeWhiteBg(this.femaleSprite, 'player-f');
 
@@ -317,6 +317,7 @@ export class CharacterSelectScene extends Phaser.Scene {
     this.cameras.main.fadeOut(500, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.start('IntroScene');
+      // this.scene.launch('UIScene');
     });
 
     this.playClick();

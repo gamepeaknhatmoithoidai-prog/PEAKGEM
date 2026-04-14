@@ -12,8 +12,6 @@ const GROUND_Y = 420;
 // Playable floor height (invisible ground platform)
 const FLOOR_H  = 120;
 
-interface CrocSpot { x: number; y: number; hit: boolean; img: Phaser.GameObjects.Graphics }
-
 export class Chapter1Scene extends Phaser.Scene {
   private gs!: GS;
   private player!: Player;
@@ -24,7 +22,6 @@ export class Chapter1Scene extends Phaser.Scene {
   private inDialog = false;
   private _pendingNPC: NPC | null = null;
 
-  private crocs: CrocSpot[] = [];
   private deerX = 980; private deerY = 390;
   private deerRescued = false;
   private deerRescuing = false;
@@ -58,8 +55,7 @@ export class Chapter1Scene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, MAP_W_CH1, MAP_H);
 
     this.buildWorld();
-    this.buildCrocs();
-    this.buildDeer();
+    // this.buildDeer();
     this.buildNPCs();
 
     const gender = this.gs.get('gender') || 'male';
@@ -139,6 +135,10 @@ export class Chapter1Scene extends Phaser.Scene {
       this.add.image(440, GROUND_Y - 30, 'gate').setScale(1.4).setDepth(DEPTH_WORLD + 1);
     if (this.textures.exists('sign'))
       this.add.image(120, GROUND_Y - 28, 'sign').setScale(1.2).setDepth(DEPTH_WORLD);
+    if (this.textures.exists('caycamlai')) {
+      const cay = this.add.image(920, GROUND_Y - 80, 'caycamlai').setScale(0.2).setDepth(DEPTH_WORLD);
+      try { cay.setPostPipeline('WhiteKey'); } catch (_) {}
+    }
 
     // Village huts — visual only, no physics blocks
     if (this.textures.exists('hut')) {
@@ -174,7 +174,7 @@ export class Chapter1Scene extends Phaser.Scene {
     deepG.fillRect(2100, 0, MAP_W_CH1 - 2100, MAP_H);
 
     // Chapter-2 portal sign
-    const portal = this.add.text(3100, GROUND_Y - 80, '➜ Khu vực điều tra\n[Nhấn E để tiếp tục]', {
+    const portal = this.add.text(7900, GROUND_Y - 80, '➜ Khu vực điều tra\n[Nhấn E để tiếp tục]', {
       fontSize: '13px', fontFamily: 'Arial', color: '#88ccff',
       backgroundColor: '#00000099', padding: { x: 8, y: 5 },
     }).setOrigin(0.5).setDepth(DEPTH_UI);
@@ -183,7 +183,7 @@ export class Chapter1Scene extends Phaser.Scene {
     // Zone labels
     [
       { x: 120,  text: 'Cổng vào' },
-      { x: 640,  text: 'Con đường rừng' },
+      { x: 890,  text: 'Cây cẩm lai' },
       { x: 1450, text: 'Làng Mạ' },
       { x: 2400, text: 'Vùng lõi — Hạn chế ra vào' },
     ].forEach(l => {
@@ -193,17 +193,6 @@ export class Chapter1Scene extends Phaser.Scene {
       }).setDepth(DEPTH_UI);
     });
 
-    // Stream crossing (x 790-855): water strip visible only near ground level
-    const waterG = this.add.graphics().setDepth(DEPTH_WORLD - 0.3);
-    waterG.fillStyle(0x2a6b8a, 0.85);
-    waterG.fillRect(790, GROUND_Y - 30, 65, FLOOR_H + 30);
-    waterG.fillStyle(0x55aacc, 0.35);
-    for (let y = GROUND_Y - 28; y < GROUND_Y + FLOOR_H; y += 18) {
-      waterG.fillRect(800, y, 44, 7);
-    }
-    this.add.text(822, GROUND_Y - 150, 'Suối', {
-      fontSize: '9px', fontFamily: 'Arial', color: '#aaddee',
-    }).setOrigin(0.5, 0).setDepth(DEPTH_UI);
   }
 
   // Procedural background when bg-ch1 asset is missing
@@ -283,53 +272,13 @@ export class Chapter1Scene extends Phaser.Scene {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  //  CROCS — stream crossing (now vertical, standing in water)
-  // ═══════════════════════════════════════════════════════════════════
-  private buildCrocs(): void {
-    const crocYs = [GROUND_Y - 80, GROUND_Y - 40, GROUND_Y + 10];
-    crocYs.forEach((cy, i) => {
-      const cx = 808 + i * 4;
-      const g = this.add.graphics().setDepth(DEPTH_WORLD + 2);
-      this.drawCroc(g, cx, cy);
-      this.crocs.push({ x: cx, y: cy, hit: false, img: g });
-    });
-
-    this.add.text(822, GROUND_Y - 170, '🐊 Vượt qua cá sấu!', {
-      fontSize: '10px', fontFamily: 'Arial', color: '#ffcc44',
-      stroke: '#000', strokeThickness: 2,
-    }).setOrigin(0.5).setDepth(DEPTH_UI);
-  }
-
-  private drawCroc(g: Phaser.GameObjects.Graphics, cx: number, cy: number, lit = false): void {
-    g.clear();
-    g.fillStyle(lit ? 0x88cc44 : 0x4a7a28);
-    g.fillEllipse(cx, cy, 36, 14);
-    g.fillStyle(lit ? 0xaaea66 : 0x5a8a38);
-    g.fillCircle(cx + 16, cy - 2, 7);
-    g.fillStyle(0xcc2200);
-    g.fillRect(cx + 16, cy + 2, 10, 3);
-    g.fillStyle(0xffffff);
-    g.fillCircle(cx + 14, cy - 4, 2);
-    g.fillStyle(0x111100);
-    g.fillCircle(cx + 14, cy - 4, 1);
-  }
-
-  // ═══════════════════════════════════════════════════════════════════
-  //  DEER
-  // ═══════════════════════════════════════════════════════════════════
-  private buildDeer(): void {
-    if (this.textures.exists('trap'))
-      this.add.image(this.deerX, this.deerY + 18, 'trap').setScale(1.6).setDepth(DEPTH_WORLD);
-    this.deerImg = this.textures.exists('deer')
-      ? this.add.image(this.deerX, this.deerY, 'deer').setScale(1.4).setDepth(DEPTH_WORLD + 1)
-      : this.add.image(this.deerX, this.deerY, '__DEFAULT').setDisplaySize(32, 32).setVisible(false);
-
-    this.deerProgressBg = this.add.rectangle(this.deerX, this.deerY - 40, 80, 10, 0x223311)
-      .setStrokeStyle(1, 0x44aa22).setDepth(DEPTH_UI).setVisible(false);
-    this.deerProgressFill = this.add.rectangle(this.deerX - 38, this.deerY - 40, 0, 6, 0x44ff44)
-      .setDepth(DEPTH_UI + 1).setOrigin(0, 0.5).setVisible(false);
-  }
-
+  //  DEER — moved to ./build_deer.ts
+  //  To re-enable: import { buildDeer } from './build_deer';
+  //  then in create():
+  //    const d = buildDeer(this, this.deerX, this.deerY);
+  //    this.deerImg = d.deerImg;
+  //    this.deerProgressBg = d.deerProgressBg;
+  //    this.deerProgressFill = d.deerProgressFill;
   // ═══════════════════════════════════════════════════════════════════
   //  NPCs
   // ═══════════════════════════════════════════════════════════════════
@@ -341,8 +290,8 @@ export class Chapter1Scene extends Phaser.Scene {
     //   feet at 90 % of frame → world offset 1024*0.9/2*0.11 ≈ 51 px → y = GROUND_Y - 51.
     const defs = [
       { key: 'npc-kbroi',   x: 460,  y: GROUND_Y - 46, name: "K'Brơi",      dialog: 'gate-kbroi',    scale: 0.15 },
-      { key: 'npc-amaknoi', x: 1340, y: GROUND_Y - 51, name: "Ama K'Nơi",   dialog: 'amaknoi-first', scale: 0.11 },
-      { key: 'npc-yakben',  x: 1640, y: GROUND_Y - 46, name: "Bà Yă K'Ben", dialog: 'yakben-first',  scale: 0.15 },
+      { key: 'npc-amaknoi', x: 1800, y: GROUND_Y - 46, name: "Ama K'Nơi",   dialog: 'amaknoi-first', scale: 0.15 },
+      { key: 'npc-yakben',  x: 1340, y: GROUND_Y - 46, name: "Bà Yă K'Ben", dialog: 'yakben-first',  scale: 0.15 },
     ];
     for (const d of defs) {
       const npc = new NPC(this, { textureKey: d.key, x: d.x, y: d.y, name: d.name, dialogKey: d.dialog, scale: d.scale });
@@ -368,22 +317,9 @@ export class Chapter1Scene extends Phaser.Scene {
     this.player.setDepth(depthForY(py));
     for (const npc of this.npcs) { npc.setDepth(depthForY(npc.y)); }
 
-    // Croc step
-    for (const c of this.crocs) {
-      if (c.hit) continue;
-      if (Phaser.Math.Distance.Between(px, py, c.x, c.y) < 24) {
-        c.hit = true;
-        this.drawCroc(c.img, c.x, c.y, true);
-        this.gs.addScore(30);
-        this.tweens.add({ targets: c.img, y: c.y + 6, duration: 200, yoyo: true });
-        this.burstParticles(c.x, c.y, 0x44ccff, 8);
-        this.game.events.emit('notify', '+30 điểm — Nhảy qua cá sấu!', '#88ff66');
-        try { this.sound.play('click', { volume: 0.3 }); } catch (_) {}
-      }
-    }
-
-    // Deer rescue
-    const nearDeer = !this.deerRescued &&
+    // Deer rescue — only active when buildDeer() has been called
+    const deerEnabled = !!this.deerImg;
+    const nearDeer = deerEnabled && !this.deerRescued &&
       Phaser.Math.Distance.Between(px, py, this.deerX, this.deerY) < 70;
 
     // NPC proximity
@@ -427,23 +363,25 @@ export class Chapter1Scene extends Phaser.Scene {
     }
 
     // Deer rescue hold
-    if (nearDeer) {
-      this.deerProgressBg.setVisible(true);
-      this.deerProgressFill.setVisible(true);
-      if (this.player.isEKeyDown()) {
-        this.deerRescuing = true;
-        this.deerProgress += delta * 0.0006;
-        if (this.deerProgress >= 1) { this.deerProgress = 1; this.rescueDeer(); }
+    if (deerEnabled) {
+      if (nearDeer) {
+        this.deerProgressBg.setVisible(true);
+        this.deerProgressFill.setVisible(true);
+        if (this.player.isEKeyDown()) {
+          this.deerRescuing = true;
+          this.deerProgress += delta * 0.0006;
+          if (this.deerProgress >= 1) { this.deerProgress = 1; this.rescueDeer(); }
+        } else {
+          this.deerRescuing = false;
+          this.deerProgress = Math.max(0, this.deerProgress - delta * 0.0003);
+        }
+        const fill = Math.max(0, this.deerProgress) * 76;
+        this.deerProgressFill.setSize(fill, 6);
       } else {
+        this.deerProgressBg.setVisible(false);
+        this.deerProgressFill.setVisible(false);
         this.deerRescuing = false;
-        this.deerProgress = Math.max(0, this.deerProgress - delta * 0.0003);
       }
-      const fill = Math.max(0, this.deerProgress) * 76;
-      this.deerProgressFill.setSize(fill, 6);
-    } else {
-      this.deerProgressBg.setVisible(false);
-      this.deerProgressFill.setVisible(false);
-      if (!nearDeer) { this.deerRescuing = false; }
     }
   }
 
@@ -550,6 +488,7 @@ export class Chapter1Scene extends Phaser.Scene {
   // ═══════════════════════════════════════════════════════════════════
   //  DIALOG
   // ═══════════════════════════════════════════════════════════════════
+  // Start dialog (conversation) 
   private startDialog(dialogKey: string, npc: NPC | null): void {
     this.inDialog = true;
     this.player.freeze();
@@ -562,7 +501,20 @@ export class Chapter1Scene extends Phaser.Scene {
     this.scene.resume();
     this.inDialog = false;
     this.player.unfreeze();
-    if (this._pendingNPC) { this._pendingNPC.markDone(); this._pendingNPC = null; }
+
+    if (this._pendingNPC) {
+      const npc = this._pendingNPC;
+      if (this._pendingNPC.npcName === "K'Brơi"){
+          npc.markDone();
+          this._pendingNPC.walkTo(920);
+      }
+      this._pendingNPC.markDone();
+      this._pendingNPC = null;
+      this.time.delayedCall( 5000, () => {
+        npc.setDialogKey('plant-intro');   // bật lại "!" với dialog mới
+      });
+
+    }
     if (result?.scoreChange > 0) {
       this.game.events.emit('notify', `+${result.scoreChange} điểm!`, '#f5c518');
     }
@@ -583,4 +535,7 @@ export class Chapter1Scene extends Phaser.Scene {
   }
 
   shutdown(): void {}
+
+
+  
 }

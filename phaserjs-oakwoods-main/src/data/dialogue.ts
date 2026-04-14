@@ -25,51 +25,67 @@ export const DIALOGS: Record<string, Dialog> = {
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
       text: 'Dừng lại. Đây là vùng lõi Vườn Quốc gia. Không phải ai muốn vào cũng vào được.' },
     { speaker: '{name}',
-      text: 'Ồ, xin chào! Tôi là sinh viên du lịch năm 3. Đến đây để nghiên cứu cộng đồng người Mạ cho luận văn.' },
+      text: 'Xin chào. Tôi là sinh viên năm 3. Tôi có giấy giới thiệu từ Khoa Du lịch, muốn nghiên cứu tri thức bản địa người Mạ. Tôi đến đây để làm luận văn nghiên cứu của tôi.' },
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Sinh viên thành phố... đến "nghiên cứu".',
+      text: 'Luận văn. Phỏng vấn. Rồi anh về thành phố viết, đăng, xong. Người Mạ không thiếu người đến hỏi. Họ hỏi, ghi, đi. Không ai ở lại.',
       choices: [
-        { text: '[Im lặng, nhìn thẳng với ánh mắt thành thật]',
-          trust: 15, score: 60, next: 'gate-patient', decision: 'gate_patient' },
-        { text: '"Tôi thực sự muốn học hỏi, không chỉ để hoàn thành bài"',
-          trust: 7, score: 25, next: 'gate-eager', decision: 'gate_eager' },
-        { text: '"Giấy phép của tôi đã được duyệt rồi, anh cứ cho tôi vào"',
-          trust: -15, score: 0, next: 'gate-pushy', decision: 'gate_pushy' },
+        { text: 'Giấy tờ của tôi hợp lệ — anh không có lý do từ chối',
+          trust: 0, score: 0, next: 'choice 1', decision: 'gate_patient' },
+        { text: 'Anh nói đúng. Tôi không hứa mình sẽ khác. Nhưng cho tôi ở lại học — không phỏng vấn, chỉ học."',
+          trust: 7, score: 15, next: 'choice 2', decision: 'gate_eager' },
+        { text: 'Được rồi. Tôi tự tìm đường." [bật GPS]',
+          trust: 0, score: 0, next: 'choice 3', decision: 'gate_pushy' },
       ],
     },
   ],
 
-  'gate-patient': [
+  'choice 1' : [
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Hmm... Biết im lặng — điều đó hiếm thấy ở người thành phố.' },
+      text: 'Tôi không từ chối. Tôi chỉ nói sự thật.' },
+  ],
+  'choice 2' : [
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Được rồi. Ba luật: không bẻ cây vô cớ, không làm ồn, không chạm vào thú hoang khi chưa hỏi tôi. Rõ chưa?' },
-    { speaker: '{name}',
-      text: 'Rõ ạ. Cảm ơn anh K\'Brơi.' },
+      text: 'Anh biết bơi không?' },
+  ],
+  'choice 3' : [
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Đừng cảm ơn vội. Rừng tự có cách đánh giá người. Theo tôi.' },
+      text: 'GPS không có tín hiệu trong đó. Anh sẽ lạc trong 20 phút.' },
   ],
 
-  'gate-eager': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Ai cũng nói vậy. Nhưng ít người thực sự học được gì khi ra đây.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Vào đi. Đừng đi khỏi tầm nhìn của tôi.' },
-  ],
 
-  'gate-pushy': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: '...' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Giấy phép không thay thế được sự tôn trọng. Vào đi. Nhưng tôi sẽ theo dõi từng bước.' },
-  ],
+  // 'gate-patient': [
+  //   { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+  //     text: 'Hmm... Biết im lặng — điều đó hiếm thấy ở người thành phố.' },
+  //   { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+  //     text: 'Được rồi. Ba luật: không bẻ cây vô cớ, không làm ồn, không chạm vào thú hoang khi chưa hỏi tôi. Rõ chưa?' },
+  //   { speaker: '{name}',
+  //     text: 'Rõ ạ. Cảm ơn anh K\'Brơi.' },
+  //   { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+  //     text: 'Đừng cảm ơn vội. Rừng tự có cách đánh giá người. Theo tôi.' },
+  // ],
+
+  // 'gate-eager': [
+  //   { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+  //     text: 'Ai cũng nói vậy. Nhưng ít người thực sự học được gì khi ra đây.' },
+  //   { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+  //     text: 'Vào đi. Đừng đi khỏi tầm nhìn của tôi.' },
+  // ],
+
+  // 'gate-pushy': [
+  //   { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+  //     text: '...' },
+  //   { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+  //     text: 'Giấy phép không thay thế được sự tôn trọng. Vào đi. Nhưng tôi sẽ theo dõi từng bước.' },
+  // ],
 
   // ── CÂY RỪNG / PLANTS ────────────────────────────────────────────────
   'plant-intro': [
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Dừng lại. Nhìn xung quanh. Ba loài cây này — người Mạ dùng chúng hàng trăm năm nay.' },
+      text: '[chỉ vào cây] Cây cẩm lai. Hơn 150 năm. Người Mạ không chặt cây này. Không bao giờ.' },
+    { speaker: '{name}',
+      text: 'Vì sao? Gỗ đẹp lắm mà.' },
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Chọn đúng công dụng của mỗi cây. Chọn sai có hậu quả. Rừng không bao giờ tha lỗi vì không biết.' },
+      text: 'Vì nó không thuộc về mình...' },
   ],
 
   'plant-success': [

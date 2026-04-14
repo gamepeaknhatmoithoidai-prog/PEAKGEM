@@ -62,11 +62,13 @@ export class DialogScene extends Phaser.Scene {
     this.box.lineStyle(1.5, 0x3a7a28, 1);
     this.box.strokeRoundedRect(20, BOX_Y - BOX_H / 2, W - 40, BOX_H, 8);
 
-    // Portrait frame
+    // Portrait frame (kept on the left)
     this.portraitFrame = this.add.image(78, BOX_Y - 10, 'portrait-frame')
       .setScale(0.9).setDepth(2);
-    this.portrait = this.add.image(78, BOX_Y - 10, 'portrait-frame')
-      .setScale(0.75).setDepth(3).setVisible(false);
+    // Large character portrait behind the dialog box (depth 0.5 = above overlay, below box)
+    this.portrait = this.add.image(W / 2, BOX_Y - BOX_H / 2, 'portrait-frame')
+      .setOrigin(0.5, 1)
+      .setScale(0.5).setDepth(0.5).setVisible(false);
 
     // Speaker name badge
     this.speakerText = this.add.text(148, BOX_Y - BOX_H / 2 + 12, '', {
@@ -116,9 +118,11 @@ export class DialogScene extends Phaser.Scene {
 
     // Portrait
     if (line.portrait && this.textures.exists(line.portrait)) {
-      this.portrait.setTexture(line.portrait).setVisible(true).setScale(2.2);
+      this.portrait.setTexture(line.portrait).setVisible(true).setScale(0.5);
+      try { this.portrait.setPostPipeline('WhiteKey'); } catch (_) {}
     } else {
       this.portrait.setVisible(false);
+      try { this.portrait.removePostPipeline('WhiteKey'); } catch (_) {}
     }
 
     // Start typewriter
