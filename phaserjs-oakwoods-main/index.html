@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rừng Cát Tiên — Hành Trình Bảo Vệ</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        background: #0d1a07;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        overflow: hidden;
+      }
+      #game-container {
+        position: relative;
+        box-shadow: 0 0 40px rgba(50,180,80,0.3);
+        border-radius: 4px;
+      }
+      canvas { display: block; }
+      #ui-overlay {
+        position: absolute;
+        top: 0; left: 0;
+        pointer-events: none;
+        z-index: 10;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game-container"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

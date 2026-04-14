@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rừng Cát Tiên — Chương 2: Điều Tra</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a1205;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;overflow:hidden}
+#game-wrap{position:relative;box-shadow:0 0 60px rgba(40,160,70,0.25),0 0 120px rgba(40,160,70,0.1)}
+canvas{display:block}
+#loading{position:absolute;inset:0;background:#0a1205;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:16px}
+#loading h2{color:#4ab840;font-size:22px;letter-spacing:2px}
+#loading p{color:#5a7a40;font-size:13px}
+.bar-wrap{width:280px;height:6px;background:#1a2a10;border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;background:#4ab840;border-radius:3px;transition:width 0.3s}
+</style>
+</head>
+<body>
+<div id="game-wrap">
+  <div id="loading">
+    <h2>RỪNG CÁT TIÊN</h2>
+    <p>Chương 2: Bóng Tối Trong Rừng Sâu</p>
+    <div class="bar-wrap"><div class="bar-fill" id="lbar" style="width:0%"></div></div>
+    <p id="ltxt" style="color:#3a5a28;font-size:11px">Đang tải...</p>
+  </div>
+  <div id="game"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.60.0/phaser.min.js"></script>
+<script>
+// ─── CONSTANTS ───────────────────────────────────────────────────────────
+const W = 960, H = 540;
+const GROUND_Y = 420, FLOOR_H = 120;
+const MAP_W = 2600;
+const DEPTH_BG = 0, DEPTH_WORLD = 1, DEPTH_FX = 8, DEPTH_UI = 10;
+const PLAYER_SPEED = 175;
+const JUMP_VY = -520, GRAVITY = 800;
+
+// ─── DIALOGUE DATA ───────────────────────────────────────────────────────
+const DIALOGS = {
+  'ch2-intro': [
+    {spk:"K'Brơi", txt:"Đây là vùng lõi rừng. Không ai được vào nếu không có lý do. Nhưng ai đó đang làm điều gì đó ở đây."},
+    {spk:"Thuận", txt:"Những cọc khảo sát... và dấu vết máy móc. Ai có thể làm điều này trong vùng bảo vệ nghiêm?"},
+    {spk:"K'Brơi", txt:"Cần thu thập bằng chứng. Tìm ít nhất 4 mẫu — ảnh cọc, tọa độ, dấu xe, mẫu đất. Nhanh lên trước khi trời sáng."},
+  ],
+  'ch2-lan': [
+    {spk:"Lan", txt:"Tôi đã nghi ngờ từ lâu. Những báo cáo khảo sát gần đây có nhiều điểm bất thường — số liệu không khớp thực địa."},
+    {spk:"Thuận", txt:"Ai có thể làm giả báo cáo đánh giá tác động môi trường?"},
+    {spk:"Lan", txt:"Người trong cuộc. Cần ít nhất 4 bằng chứng cụ thể mới tố cáo được. Tôi sẽ hỗ trợ về mặt pháp lý nếu anh/chị tìm đủ."},
+    {spk:"Lan", txt:"Cẩn thận — có người đang theo dõi khu vực này."},
+  ],
+  'ch2-hung': [
+    {spk:"Hùng", txt:"...Anh/chị đến đây làm gì? Khu này không an toàn ban đêm."},
+    {spk:"Thuận", txt:"Tôi đang điều tra. Những dấu hiệu khảo sát kia — anh có biết gì không?"},
+    {spk:"Hùng", txt:"Tôi... không biết gì cả. Anh/chị nên đi đi.", choices:[
+      {txt:"[Kiên nhẫn] 'Anh là người quen K\'Brơi. Nếu anh biết gì, hãy nói thật.'", trust:10, score:80, next:'hung-confess'},
+      {txt:"[Đối chất] 'Anh nhận tiền từ dự án thủy điện rồi phải không?'", trust:-5, score:50, next:'hung-cornered'},
+    ]},
+  ],
+  'hung-confess': [
+    {spk:"Hùng", txt:"(Thở dài nặng nề) Tôi... đã ký vào bản báo cáo môi trường giả. Họ bảo chỉ cần chữ ký. Tôi không biết hậu quả sẽ lớn như vậy."},
+    {spk:"Hùng", txt:"Tôi có thể đưa cho anh/chị bản sao báo cáo thật. Đó là bằng chứng mạnh nhất. Nhưng tôi cần anh/chị bảo vệ gia đình tôi."},
+  ],
+  'hung-cornered': [
+    {spk:"Hùng", txt:"...Tôi không nhận tiền. Bị ép. Thôi không nói thêm."},
+    {spk:"Hùng", txt:"Cẩn thận đi. Anh/chị đang đặt mình vào nguy hiểm."},
+  ],
+  'ch2-thang': [
+    {spk:"Nguyễn Văn Thắng", txt:"Ồ! Sinh viên du lịch phải không? Tôi là Thắng, giám đốc dự án phát triển năng lượng khu vực."},
+    {spk:"Nguyễn Văn Thắng", txt:"Dự án thủy điện sẽ mang điện đến 50.000 hộ dân. Đó là tiến bộ văn minh. Cháu hiểu không?"},
+    {spk:"Thuận", txt:"Nhưng rừng nguyên sinh này, làng người Mạ — tất cả sẽ bị nhấn chìm?", choices:[
+      {txt:"'Ông nói đúng, phát triển kinh tế là ưu tiên.'", trust:-25, score:0, next:'thang-agree'},
+      {txt:"'Hệ sinh thái này nuôi sống cả vùng. Phá đi hậu quả 100 năm.'", trust:10, score:100, next:'thang-push'},
+      {txt:"'Tôi có bằng chứng về khảo sát trái phép trong vùng lõi.'", trust:15, score:180, next:'thang-expose'},
+    ]},
+  ],
+  'thang-agree':[{spk:"Nguyễn Văn Thắng", txt:"Đúng vậy! Tư duy đúng đắn. Sau khi tốt nghiệp hãy tìm tôi."}],
+  'thang-push':[{spk:"Nguyễn Văn Thắng", txt:"Lý thuyết hay. Nhưng người nghèo không sống được bằng 'hệ sinh thái'. Cháu còn trẻ, chưa hiểu thực tế."}],
+  'thang-expose':[
+    {spk:"Nguyễn Văn Thắng", txt:"..."},
+    {spk:"Nguyễn Văn Thắng", txt:"Cháu cẩn thận với những gì cháu nghĩ mình biết."},
+    {spk:"Thuận", txt:"[Nhìn thẳng] Tôi biết đủ rồi."},
+  ],
+};
+
+// ─── GAME STATE ──────────────────────────────────────────────────────────
+const GS = {
+  score: 0, trust: 30, evidence: 0, chapter: 2,
+  decisions: [], inventory: ['camera'],
+  playerName: 'Thuận', gender: 'male',
+  addScore(n){this.score=Math.max(0,this.score+n)},
+  addTrust(n){this.trust=Math.min(100,Math.max(0,this.trust+n))},
+  decide(s){if(!this.decisions.includes(s))this.decisions.push(s)},
+};
+
+// ─── PROCEDURAL SPRITE GENERATOR ─────────────────────────────────────────
+function makePlayerSprite(scene, gender){
+  const g = scene.add.graphics();
+  const c = gender==='female'?0xe8a87c:0xc8956c;
+  g.fillStyle(c); g.fillRoundedRect(20,0,24,28,4);
+  g.fillStyle(0xffd0a0); g.fillCircle(32,8,10);
+  g.fillStyle(0x2a5a1a); g.fillRect(16,28,32,22);
+  g.fillStyle(c); g.fillRect(14,50,14,24); g.fillRect(36,50,14,24);
+  g.generateTexture('player-tex',64,76); g.destroy();
+}
+function makeNPCSprite(scene,key,color,hat=false){
+  const g=scene.add.graphics();
+  g.fillStyle(0xffd0a0); g.fillCircle(24,12,11);
+  g.fillStyle(color); g.fillRoundedRect(12,22,24,20,3);
+  g.fillStyle(0x8a6a4a); g.fillRect(10,42,12,20); g.fillRect(30,42,12,20);
+  if(hat){g.fillStyle(0x2a1a0a);g.fillRect(8,4,32,6);g.fillRect(16,0,16,8);}
+  g.generateTexture(key,48,62); g.destroy();
+}
+function makeEvidenceSprite(scene,key,color){
+  const g=scene.add.graphics();
+  g.fillStyle(color,0.9); g.fillRoundedRect(0,0,28,28,4);
+  g.lineStyle(2,0xffffff,0.6); g.strokeRoundedRect(1,1,26,26,3);
+  g.fillStyle(0xffffff,0.8); g.fillRect(5,8,18,3); g.fillRect(5,14,14,3); g.fillRect(5,20,10,3);
+  g.generateTexture(key,28,28); g.destroy();
+}
+
+// ─── BOOT SCENE ──────────────────────────────────────────────────────────
+class BootScene extends Phaser.Scene{
+  constructor(){super('Boot')}
+  preload(){
+    const bar=document.getElementById('lbar'), txt=document.getElementById('ltxt');
+    this.load.on('progress',v=>{bar.style.width=(v*100)+'%';txt.textContent=`Đang tải... ${Math.round(v*100)}%`});
+    this.load.on('complete',()=>{document.getElementById('loading').style.display='none'});
+    // Generate all textures procedurally in create()
+  }
+  create(){
+    makePlayerSprite(this,'male');
+    makeNPCSprite(this,'npc-lan',0x3a6a2a);
+    makeNPCSprite(this,'npc-hung',0x2a4a6a);
+    makeNPCSprite(this,'npc-thang',0x4a2a1a,true);
+    makeNPCSprite(this,'npc-kbroi',0x1a3a1a);
+    makeEvidenceSprite(this,'ev-stake',0xcc8833);
+    makeEvidenceSprite(this,'ev-mark',0xcc3322);
+    makeEvidenceSprite(this,'ev-sample',0x4488cc);
+    makeEvidenceSprite(this,'ev-track',0x44aa44);
+    makeEvidenceSprite(this,'ev-report',0xaa44cc);
+    // Particle dot
+    const pg=this.add.graphics(); pg.fillStyle(0xffffff); pg.fillCircle(3,3,3); pg.generateTexture('dot',6,6); pg.destroy();
+    this.scene.start('Chapter2');
+  }
+}
+
+// ─── CHAPTER 2 SCENE ─────────────────────────────────────────────────────
+class Chapter2Scene extends Phaser.Scene{
+  constructor(){super('Chapter2')}
+
+  create(){
+    this.inDialog=false;
+    this.cameraMode=false;
+    this.canJump=true;
+    this.ch2Done=false;
+    this._pendingNPC=null;
+
+    this.physics.world.gravity.y=GRAVITY;
+    this.physics.world.setBounds(0,0,MAP_W,H);
+
+    this.buildBackground();
+    this.buildWorld();
+    this.buildNPCs();
+    this.buildEvidenceZones();
+    this.buildFireflies();
+    this.buildPlayer();
+    this.buildUI();
+
+    this.cameras.main.setBounds(0,0,MAP_W,H);
+    this.cameras.main.startFollow(this.player,true,0.08,0.08);
+    this.cameras.main.fadeIn(1000);
+
+    this.jumpKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.physics.add.collider(this.player,this.colliders,()=>{this.canJump=true});
+
+    this.events.on('dialog-done',this.onDialogDone,this);
+
+    // Click-to-collect in camera mode
+    this.input.on('pointerdown',ptr=>{
+      if(this.cameraMode&&!this.inDialog) this.tryCollect(ptr.worldX,ptr.worldY);
+    });
+
+    this.time.delayedCall(400,()=>{
+      this.startDialog('ch2-intro',null);
+    });
+  }
+
+  // ── BACKGROUND ────────────────────────────────────────────────────────
+  buildBackground(){
+    const bg=this.add.graphics().setDepth(DEPTH_BG);
+    // Night sky gradient bands
+    const bands=[
+      {y:0,h:H*0.15,c:0x010308},{y:H*0.15,h:H*0.15,c:0x020510},
+      {y:H*0.30,h:H*0.15,c:0x030812},{y:H*0.45,h:H*0.18,c:0x060e18},
+      {y:H*0.63,h:H*0.15,c:0x0a1a08},{y:H*0.78,h:H*0.22,c:0x060e04},
+    ];
+    for(const b of bands){bg.fillStyle(b.c);bg.fillRect(0,b.y,MAP_W,b.h+2);}
+
+    // Moon
+    bg.fillStyle(0xfff8e0,0.9);bg.fillCircle(MAP_W-160,50,28);
+    bg.fillStyle(0xeef4cc,0.15);bg.fillCircle(MAP_W-160,50,50);
+
+    // Stars
+    const rng=new Phaser.Math.RandomDataGenerator(['ch2stars']);
+    for(let i=0;i<180;i++){
+      const a=0.2+rng.frac()*0.7;
+      bg.fillStyle(0xffffff,a);
+      bg.fillCircle(rng.integerInRange(0,MAP_W),rng.integerInRange(0,H*0.58),0.5+rng.frac()*1.2);
+    }
+
+    // Dark canopy silhouettes
+    bg.fillStyle(0x030a02);
+    for(let x=0;x<MAP_W;x+=58+(x%42)){
+      const h=110+x%85,cx=x+28;
+      bg.fillCircle(cx,GROUND_Y-h,28+x%20);
+      bg.fillCircle(cx+15,GROUND_Y-h+15,22+x%14);
+      bg.fillRect(cx-4,GROUND_Y-50,8,50);
+    }
+    // Ground grass
+    bg.fillStyle(0x162808);
+    bg.fillRect(0,GROUND_Y-10,MAP_W,FLOOR_H+10);
+    bg.fillStyle(0x1e3a0a);
+    for(let x=0;x<MAP_W;x+=5){
+      const gh=5+x%8;
+      bg.fillTriangle(x,GROUND_Y-3,x+4,GROUND_Y-3,x+2,GROUND_Y-3-gh);
+    }
+    // Moonlight rays
+    const ray=this.add.graphics().setDepth(DEPTH_BG+0.2);
+    ray.fillStyle(0xeef8cc,0.018);
+    for(let rx=80;rx<MAP_W;rx+=280){
+      ray.fillTriangle(rx,0,rx+45,GROUND_Y,rx-45,GROUND_Y);
+    }
+  }
+
+  // ── WORLD GEOMETRY ────────────────────────────────────────────────────
+  buildWorld(){
+    this.colliders=this.physics.add.staticGroup();
+    this.addBlock(MAP_W/2,GROUND_Y+FLOOR_H/2,MAP_W,FLOOR_H);
+
+    // Platforms
+    const plats=[
+      {x:420,y:GROUND_Y-85,w:90},{x:780,y:GROUND_Y-70,w:80},
+      {x:1150,y:GROUND_Y-95,w:100},{x:1550,y:GROUND_Y-75,w:85},
+      {x:1950,y:GROUND_Y-90,w:100},{x:2300,y:GROUND_Y-65,w:80},
+    ];
+    for(const p of plats) this.addBlock(p.x,p.y,p.w,14);
+
+    // Danger zone overlay (x>1800)
+    const dg=this.add.graphics().setDepth(DEPTH_BG+0.8);
+    dg.fillStyle(0x300500,0.18);dg.fillRect(1800,0,MAP_W-1800,H);
+
+    // Trees (procedural)
+    const tg=this.add.graphics().setDepth(DEPTH_WORLD-0.3);
+    const treeXs=[200,330,570,710,980,1120,1380,1600,1850,2080,2350,2500];
+    for(const tx of treeXs){
+      const s=0.8+tx%4*0.07,hh=90+tx%60;
+      tg.fillStyle(0x0a1a05);
+      tg.fillTriangle(tx-28*s,GROUND_Y,tx+28*s,GROUND_Y,tx,GROUND_Y-hh*s);
+      tg.fillTriangle(tx-22*s,GROUND_Y-hh*0.35*s,tx+22*s,GROUND_Y-hh*0.35*s,tx,GROUND_Y-(hh+35)*s);
+      tg.fillRect(tx-5,GROUND_Y-24,10,24);
+    }
+    // Bushes
+    tg.fillStyle(0x0e2208);
+    [160,450,680,1050,1450,2050,2400].forEach(bx=>{
+      tg.fillEllipse(bx,GROUND_Y-8,40+bx%20,18+bx%10);
+    });
+
+    // Machine silhouette
+    const mg=this.add.graphics().setDepth(DEPTH_WORLD);
+    mg.fillStyle(0x1a1a10);mg.fillRect(2000,GROUND_Y-100,160,90);
+    mg.fillRect(2060,GROUND_Y-130,40,32);
+    mg.fillStyle(0x282820);mg.fillRect(2005,GROUND_Y-95,150,82);
+    mg.fillStyle(0xff2200,0.7);mg.fillCircle(2155,GROUND_Y-105,5);
+    this.tweens.add({targets:mg,alpha:0.5,duration:700,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+
+    // Pipeline
+    const pg=this.add.graphics().setDepth(DEPTH_WORLD-0.2);
+    pg.fillStyle(0x444433,0.7);pg.fillRect(1900,GROUND_Y-8,MAP_W-1900,4);
+
+    // Hut
+    const hg=this.add.graphics().setDepth(DEPTH_WORLD+0.5);
+    hg.fillStyle(0x3a2a1a);hg.fillRect(370,GROUND_Y-80,80,60);
+    hg.fillStyle(0x5a3a18);hg.fillTriangle(360,GROUND_Y-80,460,GROUND_Y-80,410,GROUND_Y-120);
+    hg.fillStyle(0x2a4a1a);hg.fillRect(395,GROUND_Y-44,20,24);
+
+    // Warning text
+    const wt=this.add.text(1840,GROUND_Y-150,'⚠ VÙNG CẤM',{
+      fontSize:'13px',fontFamily:'Arial',color:'#ff4444',
+      stroke:'#000',strokeThickness:2,
+    }).setDepth(DEPTH_UI);
+    this.tweens.add({targets:wt,alpha:0.4,duration:800,yoyo:true,repeat:-1});
+
+    // End portal
+    const ep=this.add.text(MAP_W-80,GROUND_Y-90,'📋 Nộp báo cáo\n[Nhấn E]',{
+      fontSize:'12px',fontFamily:'Arial',color:'#88ccff',
+      backgroundColor:'#00000088',padding:{x:6,y:4},align:'center',
+    }).setOrigin(0.5).setDepth(DEPTH_UI);
+    this.tweens.add({targets:ep,alpha:0.4,duration:1000,yoyo:true,repeat:-1});
+
+    // Zone labels
+    [
+      {x:80,t:'← Chương 2 bắt đầu'},{x:900,t:'Khu điều tra'},
+      {x:1800,t:'Vùng cấm — máy khảo sát'},{x:2400,t:'Trung tâm dự án'},
+    ].forEach(l=>{
+      this.add.text(l.x,GROUND_Y-145,l.t,{
+        fontSize:'10px',fontFamily:'Arial',color:'#5a8a44',
+        stroke:'#000',strokeThickness:1,
+      }).setDepth(DEPTH_UI);
+    });
+  }
+
+  addBlock(x,y,w,h){
+    const b=this.colliders.create(x,y,'__DEFAULT');
+    b.setDisplaySize(w,h).setVisible(false).refreshBody();
+  }
+
+  // ── NPCs ──────────────────────────────────────────────────────────────
+  buildNPCs(){
+    this.npcs=[];
+    const defs=[
+      {key:'npc-lan',x:360,y:GROUND_Y-31,name:'Lan',dialog:'ch2-lan',color:0x3a9a4a},
+      {key:'npc-hung',x:1400,y:GROUND_Y-31,name:'Hùng',dialog:'ch2-hung',color:0x4a7aaa},
+      {key:'npc-thang',x:2050,y:GROUND_Y-31,name:'Thắng',dialog:'ch2-thang',color:0xcc6633},
+      {key:'npc-kbroi',x:180,y:GROUND_Y-31,name:"K'Brơi",dialog:'ch2-intro',color:0x3a7a2a},
+    ];
+    for(const d of defs){
+      const spr=this.add.image(d.x,d.y,d.key).setScale(0.9).setDepth(4);
+      // Colorize tint
+      const nameTag=this.add.text(d.x,d.y-44,d.name,{
+        fontSize:'11px',fontFamily:'Arial',color:'#ffeebb',
+        stroke:'#000',strokeThickness:3,
+      }).setOrigin(0.5).setDepth(6);
+      const exclaim=this.add.text(d.x,d.y-58,'!',{
+        fontSize:'18px',fontFamily:'Arial',fontStyle:'bold',
+        color:'#ffcc00',stroke:'#000',strokeThickness:3,
+      }).setOrigin(0.5).setDepth(7);
+      this.tweens.add({targets:exclaim,y:d.y-64,duration:700,yoyo:true,repeat:-1,ease:'Sine'});
+      const hint=this.add.text(d.x,d.y-72,'E — Nói chuyện',{
+        fontSize:'10px',fontFamily:'Arial',color:'#fff',
+        backgroundColor:'#00000099',padding:{x:5,y:2},
+      }).setOrigin(0.5).setDepth(7).setVisible(false);
+      this.npcs.push({x:d.x,y:d.y,name:d.name,dialog:d.dialog,spr,nameTag,exclaim,hint,done:false});
+    }
+  }
+
+  // ── EVIDENCE ZONES ────────────────────────────────────────────────────
+  buildEvidenceZones(){
+    this.evZones=[];
+    const positions=[
+      {x:650,y:GROUND_Y-50,id:'ev-stake',label:'Cọc khảo sát',key:'ev-stake'},
+      {x:900,y:GROUND_Y-40,id:'ev-mark',label:'Dấu sơn đỏ',key:'ev-mark'},
+      {x:1200,y:GROUND_Y-55,id:'ev-sample',label:'Mẫu đất',key:'ev-sample'},
+      {x:1700,y:GROUND_Y-45,id:'ev-track',label:'Dấu xe tải',key:'ev-track'},
+      {x:2200,y:GROUND_Y-50,id:'ev-report',label:'Tài liệu rò rỉ',key:'ev-report'},
+    ];
+    const eg=this.add.graphics().setDepth(DEPTH_WORLD+1);
+    for(const p of positions){
+      eg.lineStyle(2,0xffaa00,0.7);eg.strokeCircle(p.x,p.y,24);
+      const spr=this.add.image(p.x,p.y,p.key).setDepth(DEPTH_WORLD+0.5);
+      const qmark=this.add.text(p.x,p.y-38,'?',{
+        fontSize:'18px',fontFamily:'Arial',fontStyle:'bold',
+        color:'#ffaa00',stroke:'#000',strokeThickness:2,
+      }).setOrigin(0.5).setDepth(DEPTH_WORLD+2);
+      this.tweens.add({targets:qmark,y:p.y-44,duration:600,yoyo:true,repeat:-1});
+      this.evZones.push({...p,radius:60,collected:false,spr,qmark});
+    }
+  }
+
+  // ── FIREFLIES ─────────────────────────────────────────────────────────
+  buildFireflies(){
+    if(!this.textures.exists('dot'))return;
+    this.add.particles(0,0,'dot',{
+      x:{min:0,max:MAP_W},y:{min:10,max:GROUND_Y-20},
+      lifespan:{min:2500,max:5000},speed:{min:4,max:16},
+      scale:{start:0.45,end:0},alpha:{start:0.85,end:0},
+      tint:[0x88ff44,0xaaff66,0x44ffaa,0xccff66],
+      quantity:1,frequency:180,
+    }).setDepth(DEPTH_FX);
+  }
+
+  // ── PLAYER ────────────────────────────────────────────────────────────
+  buildPlayer(){
+    this.player=this.physics.add.sprite(80,GROUND_Y-60,'player-tex');
+    this.player.setScale(0.85).setDepth(6);
+    this.playerBody=this.player.body;
+    this.playerBody.setCollideWorldBounds(true);
+    this.playerBody.setMaxVelocityY(900);
+    this.playerBody.setSize(28,48).setOffset(18,14);
+
+    this.cursors=this.input.keyboard.createCursorKeys();
+    this.wasd={
+      up:this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+      down:this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+      left:this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+      right:this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+    };
+    this.interactKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    this.camKey=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C);
+  }
+
+  // ── UI ────────────────────────────────────────────────────────────────
+  buildUI(){
+    // Top bar
+    const topBar=this.add.graphics().setDepth(DEPTH_UI).setScrollFactor(0);
+    topBar.fillStyle(0x000000,0.65);topBar.fillRect(0,0,W,34);
+    topBar.fillStyle(0x2a5a18,0.6);topBar.fillRect(0,33,W,1.5);
+
+    this.add.text(12,8,'⭐',{fontSize:'13px'}).setDepth(DEPTH_UI).setScrollFactor(0);
+    this.scoreText=this.add.text(30,8,'0',{fontSize:'12px',fontFamily:'Arial',fontStyle:'bold',color:'#f5c518'})
+      .setDepth(DEPTH_UI).setScrollFactor(0);
+
+    this.add.text(W/2-130,8,"Tin tưởng K'Brơi:",{fontSize:'11px',fontFamily:'Arial',color:'#cceeaa'})
+      .setDepth(DEPTH_UI).setScrollFactor(0);
+    this.trustBarBg=this.add.rectangle(W/2+55,17,130,10,0x1a2a10)
+      .setStrokeStyle(1,0x3a5a28).setDepth(DEPTH_UI).setScrollFactor(0);
+    this.trustFill=this.add.rectangle(W/2-10,17,0,8,0x4ab840)
+      .setDepth(DEPTH_UI).setScrollFactor(0);
+    this.refreshTrust();
+
+    this.add.text(W-110,8,'Chương 2',{fontSize:'12px',fontFamily:'Arial',color:'#88ccff'})
+      .setDepth(DEPTH_UI).setScrollFactor(0);
+    this.muteBtn=this.add.text(W-28,8,'🔊',{fontSize:'14px'})
+      .setDepth(DEPTH_UI).setScrollFactor(0).setInteractive({useHandCursor:true});
+    this.muteBtn.on('pointerdown',()=>this.toggleMute());
+    this.muted=false;
+
+    // Camera mode toggle button
+    this.camToggleBtn=this.add.text(W/2,8,'[C] Chế độ chụp ảnh',{
+      fontSize:'11px',fontFamily:'Arial',color:'#aaddff',
+      backgroundColor:'#00000066',padding:{x:6,y:3},
+    }).setOrigin(0.5,0).setDepth(DEPTH_UI).setScrollFactor(0).setInteractive({useHandCursor:true});
+    this.camToggleBtn.on('pointerdown',()=>this.toggleCameraMode());
+
+    // Camera mode UI panel
+    this.camPanel=this.add.container(W/2,52).setScrollFactor(0).setDepth(DEPTH_UI).setVisible(false);
+    const cpBg=this.add.rectangle(0,0,240,28,0x000000,0.8).setStrokeStyle(1.5,0x88ccff);
+    const cpLabel=this.add.text(-100,0,'📷 CHẾ ĐỘ CHỤP ẢNH',{fontSize:'12px',fontFamily:'Arial',fontStyle:'bold',color:'#88ccff'}).setOrigin(0,0.5);
+    this.evCountText=this.add.text(60,0,'0/5',{fontSize:'11px',fontFamily:'Arial',color:'#fff'}).setOrigin(0,0.5);
+    this.camPanel.add([cpBg,cpLabel,this.evCountText]);
+
+    // Bottom bar
+    const botBar=this.add.graphics().setDepth(DEPTH_UI).setScrollFactor(0);
+    botBar.fillStyle(0x000000,0.5);botBar.fillRect(0,H-26,W,26);
+    this.add.text(W/2,H-13,'WASD/←→ di chuyển  •  SPACE nhảy  •  E tương tác  •  C chụp ảnh',{
+      fontSize:'10px',fontFamily:'Arial',color:'#4a6a34',
+    }).setOrigin(0.5,0.5).setDepth(DEPTH_UI).setScrollFactor(0);
+
+    // Inventory text
+    this.add.text(10,H-18,'🎒',{fontSize:'12px'}).setDepth(DEPTH_UI).setScrollFactor(0);
+    this.invText=this.add.text(30,H-18,'📷 Máy ảnh',{fontSize:'11px',fontFamily:'Arial',color:'#cceeaa'})
+      .setOrigin(0,0.5).setDepth(DEPTH_UI).setScrollFactor(0);
+
+    // Hint text (follows player)
+    this.hintText=this.add.text(0,0,'',{
+      fontSize:'13px',fontFamily:'Arial',color:'#ffffaa',
+      backgroundColor:'#00000099',padding:{x:7,y:4},
+    }).setDepth(DEPTH_UI+5).setScrollFactor(0).setVisible(false);
+
+    // Notification text
+    this.notifText=this.add.text(W/2,60,'',{
+      fontSize:'15px',fontFamily:'Arial',fontStyle:'bold',color:'#ffffff',
+      stroke:'#000',strokeThickness:3,backgroundColor:'#00000088',padding:{x:12,y:6},
+    }).setOrigin(0.5).setDepth(DEPTH_UI+8).setScrollFactor(0).setVisible(false);
+  }
+
+  refreshTrust(){
+    const t=GS.trust/100;
+    const maxW=120;
+    const fill=t*maxW;
+    this.trustFill.setPosition(W/2-5-maxW/2+fill/2,17);
+    this.trustFill.setSize(fill,8);
+    const color=GS.trust<30?0xcc4422:GS.trust<60?0xddaa22:0x4ab840;
+    this.trustFill.setFillStyle(color);
+  }
+
+  showNotif(msg,color='#ffffff'){
+    this.notifText.setText(msg).setColor(color).setVisible(true).setAlpha(1);
+    if(this._notifTween)this._notifTween.stop();
+    this._notifTween=this.tweens.add({
+      targets:this.notifText,alpha:0,delay:2400,duration:600,
+      onComplete:()=>this.notifText.setVisible(false),
+    });
+    // also update score
+    this.scoreText.setText(GS.score.toString());
+    this.tweens.add({targets:this.scoreText,scaleX:1.4,scaleY:1.4,duration:120,yoyo:true});
+    this.refreshTrust();
+  }
+
+  toggleCameraMode(){
+    this.cameraMode=!this.cameraMode;
+    this.camPanel.setVisible(this.cameraMode);
+    const cam=this.cameras.main;
+    if(this.cameraMode){
+      cam.setTint(0xddeeff);
+      this.showNotif('📷 Chế độ chụp ảnh BẬT — C hoặc Click để chụp bằng chứng','#88ccff');
+    } else {
+      cam.clearTint();
+    }
+  }
+
+  toggleMute(){
+    this.muted=!this.muted;
+    this.muteBtn.setText(this.muted?'🔇':'🔊');
+    if(this.muted)this.sound.setVolume(0); else this.sound.setVolume(1);
+  }
+
+  // ── EVIDENCE COLLECTION ───────────────────────────────────────────────
+  tryCollect(cx,cy){
+    for(const ev of this.evZones){
+      if(ev.collected)continue;
+      if(Phaser.Math.Distance.Between(cx,cy,ev.x,ev.y)<ev.radius){
+        this.collectEvidence(ev);break;
+      }
+    }
+  }
+
+  collectEvidence(ev){
+    ev.collected=true;
+    ev.spr.destroy();ev.qmark.destroy();
+    GS.evidence=(GS.evidence||0)+1;
+    GS.addScore(150);
+    GS.inventory.push(ev.id);
+    const flash=this.add.rectangle(ev.x,ev.y,50,50,0xffffff,0.8).setDepth(20);
+    this.tweens.add({targets:flash,alpha:0,duration:300,onComplete:()=>flash.destroy()});
+    // burst
+    if(this.textures.exists('dot')){
+      const em=this.add.particles(ev.x,ev.y,'dot',{
+        lifespan:700,speed:{min:60,max:160},scale:{start:0.6,end:0},
+        alpha:{start:1,end:0},tint:[0xffcc44,0xff8844],quantity:12,stopAfter:12,
+      }).setDepth(DEPTH_FX);
+      this.time.delayedCall(800,()=>em.destroy());
+    }
+    this.evCountText.setText(`${GS.evidence}/5 bằng chứng`);
+    this.showNotif(`📷 Bằng chứng ${GS.evidence}/5 — "${ev.label}" +150 điểm`,'#f5c518');
+    this.refreshInventory();
+    if(GS.evidence>=4){
+      this.time.delayedCall(600,()=>
+        this.showNotif('✅ Đủ bằng chứng! Nộp báo cáo ở cuối bản đồ hoặc đối chất Thắng.','#88ff66'));
+    }
+  }
+
+  refreshInventory(){
+    const labels={'camera':'📷 Máy ảnh','ev-stake':'📍 Cọc kh.sát','ev-mark':'🔴 Dấu sơn','ev-sample':'🧪 Mẫu đất','ev-track':'🚜 Dấu xe','ev-report':'📄 Tài liệu'};
+    const txt=GS.inventory.map(k=>labels[k]||k).join('  ');
+    this.invText.setText(txt||'Trống');
+  }
+
+  // ── DIALOG ────────────────────────────────────────────────────────────
+  startDialog(dialogKey,npc){
+    this.inDialog=true;
+    if(this.player.body)this.player.body.setVelocity(0,0);
+    this._pendingNPC=npc;
+    this.scene.launch('Dialog',{dialogKey,src:'Chapter2'});
+    this.scene.pause();
+  }
+
+  onDialogDone(result){
+    this.scene.resume();
+    this.inDialog=false;
+    if(this._pendingNPC){
+      this._pendingNPC.done=true;
+      this._pendingNPC.exclaim.setVisible(false);
+      this._pendingNPC.hint.setVisible(false);
+      this._pendingNPC=null;
+    }
+    if(result?.scoreChange>0){
+      GS.addScore(result.scoreChange);
+      this.showNotif(`+${result.scoreChange} điểm!`,'#f5c518');
+    }
+    if(result?.trustChange){
+      GS.addTrust(result.trustChange);
+    }
+    if(result?.decision){
+      GS.decide(result.decision);
+      if(result.decision==='hung_trust'||result.decision==='hung_confess'){
+        GS.inventory.push('report');
+        this.refreshInventory();
+        this.showNotif('📄 Nhận được: Bản sao báo cáo thật! +100 điểm','#88ff66');
+        GS.addScore(100);
+        this.scoreText.setText(GS.score.toString());
+      }
+    }
+    this.scoreText.setText(GS.score.toString());
+    this.refreshTrust();
+  }
+
+  // ── UPDATE ────────────────────────────────────────────────────────────
+  update(_t,delta){
+    if(this.inDialog)return;
+
+    // Movement
+    const body=this.playerBody;
+    const goL=this.cursors.left.isDown||this.wasd.left.isDown;
+    const goR=this.cursors.right.isDown||this.wasd.right.isDown;
+    let vx=0;
+    if(goL)vx=-PLAYER_SPEED;
+    else if(goR)vx=PLAYER_SPEED;
+    body.setVelocityX(vx);
+    if(body.blocked.down)this.canJump=true;
+    if(vx<0)this.player.setFlipX(true);
+    else if(vx>0)this.player.setFlipX(false);
+
+    // Jump
+    if(this.canJump&&Phaser.Input.Keyboard.JustDown(this.jumpKey)){
+      body.setVelocityY(JUMP_VY);
+      this.canJump=false;
+      this.tweens.add({targets:this.player,scaleY:0.8*0.85,duration:70,yoyo:true,ease:'Sine.easeOut'});
+    }
+
+    const px=this.player.x,py=this.player.y;
+    const depthForY=y=>2+(y/H)*3;
+    this.player.setDepth(depthForY(py));
+    for(const npc of this.npcs)npc.spr.setDepth(depthForY(npc.y));
+
+    // Camera toggle
+    if(Phaser.Input.Keyboard.JustDown(this.camKey)) this.toggleCameraMode();
+
+    // NPC proximity
+    let nearNPC=null;
+    for(const npc of this.npcs){
+      const d=Phaser.Math.Distance.Between(px,py,npc.x,npc.y);
+      npc.hint.setVisible(d<80&&!npc.done);
+      if(d<80&&!npc.done)nearNPC=npc;
+    }
+
+    // Evidence near (camera mode)
+    const nearEv=this.cameraMode?this.evZones.find(ev=>!ev.collected&&Phaser.Math.Distance.Between(px,py,ev.x,ev.y)<ev.radius):null;
+    const nearPortal=px>MAP_W-160&&!this.ch2Done;
+
+    // Hint
+    let hint='';
+    if(!this.cameraMode&&nearNPC&&!nearNPC.done) hint=`💬 E — Nói chuyện với ${nearNPC.name}`;
+    else if(!this.cameraMode) hint='📷 C — Bật chế độ chụp ảnh';
+    else if(nearEv) hint='📷 C hoặc Click — Chụp bằng chứng!';
+    else if(nearPortal) hint='📋 E — Nộp báo cáo & kết thúc';
+
+    if(hint){
+      this.hintText.setText(hint).setVisible(true);
+      const cam=this.cameras.main;
+      const sx=(px-cam.scrollX)*cam.zoom;
+      const sy=(py-cam.scrollY)*cam.zoom-55;
+      this.hintText.setPosition(sx-this.hintText.width/2,sy);
+    } else {
+      this.hintText.setVisible(false);
+    }
+
+    // E key
+    if(Phaser.Input.Keyboard.JustDown(this.interactKey)){
+      if(nearNPC&&!nearNPC.done&&!this.cameraMode){
+        this.startDialog(nearNPC.dialog,nearNPC);return;
+      }
+      if(nearPortal){this.ch2Done=true;this.goToEnding();return;}
+    }
+
+    // C key collect if near evidence and in cam mode
+    if(Phaser.Input.Keyboard.JustDown(this.camKey)&&this.cameraMode&&nearEv){
+      this.tryCollect(px,py);
+    }
+
+    void delta;
+  }
+
+  // ── ENDING ────────────────────────────────────────────────────────────
+  goToEnding(){
+    this.cameras.main.fadeOut(800,0,0,0);
+    this.cameras.main.once('camerafadeoutcomplete',()=>{
+      this.scene.stop('Dialog');
+      this.scene.start('Ending');
+    });
+  }
+
+  shutdown(){
+    this.events.off('dialog-done',this.onDialogDone,this);
+  }
+}
+
+// ─── DIALOG SCENE ────────────────────────────────────────────────────────
+class DialogScene extends Phaser.Scene{
+  constructor(){super({key:'Dialog',active:false})}
+
+  init(data){
+    this.dialogKey=data.dialogKey;
+    this.srcScene=data.src;
+    this.lines=DIALOGS[data.dialogKey]||[];
+    this.lineIdx=0;
+    this.charIdx=0;
+    this.displayText='';
+    this.phase='typing';
+    this.resultData={};
+  }
+
+  create(){
+    this.add.rectangle(W/2,H/2,W,H,0x000000,0.4).setDepth(0);
+    const BOX_Y=H-115,BOX_H=132;
+    const box=this.add.graphics().setDepth(1);
+    box.fillStyle(0x0a1a05,0.93);
+    box.fillRoundedRect(20,BOX_Y-BOX_H/2,W-40,BOX_H,8);
+    box.lineStyle(1.5,0x3a7a28,1);
+    box.strokeRoundedRect(20,BOX_Y-BOX_H/2,W-40,BOX_H,8);
+
+    this.speakerText=this.add.text(148,BOX_Y-BOX_H/2+10,'',{
+      fontSize:'13px',fontFamily:'Arial',fontStyle:'bold',color:'#88ff66',
+      stroke:'#000',strokeThickness:2,backgroundColor:'#0a1a0599',padding:{x:8,y:3},
+    }).setDepth(4);
+    this.bodyText=this.add.text(148,BOX_Y-BOX_H/2+34,'',{
+      fontSize:'13px',fontFamily:'Arial',color:'#e8f5d8',
+      wordWrap:{width:W-200},lineSpacing:6,
+    }).setDepth(4);
+
+    // Portrait area
+    const portBg=this.add.graphics().setDepth(2);
+    portBg.fillStyle(0x0a1a08);portBg.fillRoundedRect(28,BOX_Y-BOX_H/2+4,88,BOX_H-8,6);
+    portBg.lineStyle(1,0x3a7a28);portBg.strokeRoundedRect(28,BOX_Y-BOX_H/2+4,88,BOX_H-8,6);
+
+    this.contHint=this.add.text(W-36,H-22,'▼',{fontSize:'14px',fontFamily:'Arial',color:'#88cc66'})
+      .setOrigin(0.5).setDepth(4).setVisible(false);
+    this.tweens.add({targets:this.contHint,y:H-18,duration:500,yoyo:true,repeat:-1});
+
+    this.choiceContainer=this.add.container(0,0).setDepth(10);
+
+    this.input.keyboard.on('keydown-SPACE',()=>this.handleInput());
+    this.input.keyboard.on('keydown-ENTER',()=>this.handleInput());
+    this.input.on('pointerdown',()=>this.handleInput());
+
+    this._currentText='';
+    this._hasChoices=false;
+    this.showLine();
+  }
+
+  showLine(){
+    if(this.lineIdx>=this.lines.length){this.closeDialog();return;}
+    const line=this.lines[this.lineIdx];
+    this.speakerText.setText(line.spk||'');
+    this._currentText=line.txt||'';
+    this._hasChoices=!!(line.choices&&line.choices.length);
+    this.displayText='';this.charIdx=0;this.phase='typing';
+    this.contHint.setVisible(false);
+    this.typeTimer=0;
+  }
+
+  update(_t,delta){
+    if(this.phase!=='typing')return;
+    this.typeTimer=(this.typeTimer||0)+delta;
+    if(this.typeTimer>22){
+      this.typeTimer=0;
+      const full=this._currentText;
+      if(this.charIdx<full.length){
+        this.charIdx=Math.min(full.length,this.charIdx+2);
+        this.displayText=full.slice(0,this.charIdx);
+        this.bodyText.setText(this.displayText);
+      } else {
+        const line=this.lines[this.lineIdx];
+        if(this._hasChoices&&line.choices?.length){
+          this.phase='choice';this.showChoices(line);
+        } else {
+          this.phase='waiting';this.contHint.setVisible(true);
+        }
+      }
+    }
+  }
+
+  showChoices(line){
+    this.choiceContainer.removeAll(true);
+    this.contHint.setVisible(false);
+    const choices=line.choices;
+    const startY=H-148-(choices.length*40);
+    choices.forEach((ch,i)=>{
+      const bg=this.add.rectangle(0,0,W-80,34,0x0d2508,0.9).setStrokeStyle(1,0x3a7a28);
+      const label=this.add.text(-(W-80)/2+12,0,ch.txt,{
+        fontSize:'12px',fontFamily:'Arial',color:'#cceeaa',wordWrap:{width:W-120},
+      }).setOrigin(0,0.5);
+      const btn=this.add.container(W/2,startY+i*40,[bg,label])
+        .setSize(W-80,34).setInteractive({useHandCursor:true});
+      btn.on('pointerover',()=>{bg.setFillStyle(0x1a4a10);label.setColor('#ffffff')});
+      btn.on('pointerout',()=>{bg.setFillStyle(0x0d2508);label.setColor('#cceeaa')});
+      btn.on('pointerdown',()=>this.selectChoice(line,i));
+      this.choiceContainer.add(btn);
+    });
+  }
+
+  selectChoice(line,idx){
+    const ch=line.choices[idx];
+    this.choiceContainer.removeAll(true);
+    const result={};
+    if(ch.trust){GS.addTrust(ch.trust);result.trustChange=ch.trust;}
+    if(ch.score){GS.addScore(ch.score);result.scoreChange=ch.score;}
+    if(ch.decision){GS.decide(ch.decision);result.decision=ch.decision;}
+    if(ch.next&&DIALOGS[ch.next]){
+      this.lines=DIALOGS[ch.next];this.lineIdx=0;this.showLine();
+    } else {
+      this.resultData=result;this.closeDialog(result);
+    }
+  }
+
+  handleInput(){
+    if(this.phase==='choice')return;
+    const full=this._currentText;
+    if(this.phase==='typing'){
+      this.displayText=full;this.charIdx=full.length;this.bodyText.setText(full);
+      const line=this.lines[this.lineIdx];
+      if(this._hasChoices&&line.choices?.length){this.phase='choice';this.showChoices(line);}
+      else{this.phase='waiting';this.contHint.setVisible(true);}
+    } else if(this.phase==='waiting'){
+      this.lineIdx++;this.showLine();
+    }
+  }
+
+  closeDialog(result=null){
+    const src=this.scene.get(this.srcScene);
+    if(src)src.events.emit('dialog-done',result||this.resultData);
+    this.scene.stop();
+  }
+}
+
+// ─── ENDING SCENE ────────────────────────────────────────────────────────
+class EndingScene extends Phaser.Scene{
+  constructor(){super('Ending')}
+
+  create(){
+    const ending=this.getEnding();
+    const bg=this.add.graphics();
+    const cols={good:0x1a3a10,neutral:0x1a2a18,bad:0x0a1008};
+    bg.fillStyle(cols[ending]);bg.fillRect(0,0,W,H);
+    bg.fillStyle(0xffffff,0.45);
+    for(let i=0;i<30;i++)bg.fillCircle(Phaser.Math.Between(0,W),Phaser.Math.Between(0,H*0.4),0.8+Math.random());
+    if(ending==='good'){bg.fillStyle(0xffcc44,0.25);bg.fillCircle(W/2,H*0.28,110);}
+    bg.fillStyle(0x050f03);
+    [{x:30,h:270},{x:110,h:230},{x:800,h:250},{x:900,h:290}].forEach(t=>{
+      bg.fillTriangle(t.x-28,H,t.x+28,H,t.x,H-t.h);bg.fillRect(t.x-7,H-48,14,48);
+    });
+
+    const score=GS.score,trust=GS.trust,ev=GS.evidence||0,animal=GS.inventory.includes('report');
+    const endLbls={good:'🌿 KẾT THÚC TỐT — Rừng được bảo vệ!',neutral:'⚖ KẾT THÚC TRUNG BÌNH — Cuộc chiến chưa kết thúc',bad:'🌧 KẾT THÚC BAD — Dự án được thông qua...'};
+    const endColors={good:'#88ff66',neutral:'#f5c518',bad:'#ff6644'};
+
+    const card=this.add.graphics().setDepth(5);
+    card.fillStyle(0x0a1a05,0.97);card.fillRoundedRect(W/2-300,25,600,H-50,10);
+    card.lineStyle(2,0x3a7a28);card.strokeRoundedRect(W/2-300,25,600,H-50,10);
+
+    this.add.text(W/2,62,endLbls[ending],{fontSize:'16px',fontFamily:'Arial',fontStyle:'bold',color:endColors[ending]}).setOrigin(0.5).setDepth(6);
+    this.add.text(W/2,96,`Nhân vật: ${GS.playerName}`,{fontSize:'14px',fontFamily:'Arial',color:'#cceeaa'}).setOrigin(0.5).setDepth(6);
+
+    const dg=this.add.graphics().setDepth(6);
+    dg.lineStyle(1,0x3a7a28,0.6);dg.lineBetween(W/2-240,115,W/2+240,115);
+
+    const stats=[
+      {label:'⭐ Tổng điểm:',val:`${score}`,color:'#f5c518'},
+      {label:"🤝 Niềm tin K'Brơi:",val:`${trust}/100`,color:trust>=60?'#88ff66':'#f5c518'},
+      {label:'📷 Bằng chứng:',val:`${ev}/5`,color:ev>=4?'#88ff66':'#ff6644'},
+      {label:'📄 Báo cáo thật:',val:animal?'Có ✅':'Không ❌',color:animal?'#88ff66':'#ff6644'},
+    ];
+    stats.forEach((s,i)=>{
+      this.add.text(W/2-220,136+i*38,s.label,{fontSize:'14px',fontFamily:'Arial',color:'#cceeaa'}).setDepth(6);
+      this.add.text(W/2+200,136+i*38,s.val,{fontSize:'14px',fontFamily:'Arial',fontStyle:'bold',color:s.color}).setOrigin(1,0).setDepth(6);
+    });
+
+    dg.lineBetween(W/2-240,295,W/2+240,295);
+    this.add.text(W/2,308,'Quyết định của bạn:',{fontSize:'12px',fontFamily:'Arial',color:'#88cc66'}).setOrigin(0.5).setDepth(6);
+    const dLabels={
+      'gate_patient':'✅ Kiên nhẫn tại cổng vào','gate_pushy':'❌ Dùng giấy phép ép vào',
+      'hung_trust':'✅ Tin tưởng Hùng nói thật','hung_confront':'→ Đối chất trực tiếp Hùng',
+      'agree_thang':'❌ Đồng ý với dự án thủy điện','question_thang':'→ Chất vấn tác động môi trường',
+      'confront_thang':'✅ Đưa bằng chứng đối chất Thắng',
+    };
+    GS.decisions.slice(0,5).forEach((d,i)=>{
+      const label=dLabels[d]||d;
+      const color=label.startsWith('✅')?'#88ff66':label.startsWith('❌')?'#ff6644':'#cceeaa';
+      this.add.text(W/2-220,330+i*22,label,{fontSize:'12px',fontFamily:'Arial',color}).setDepth(6);
+    });
+
+    dg.lineBetween(W/2-240,H-115,W/2+240,H-115);
+    const msgByEnding={
+      good:'Cảm ơn bạn đã đứng về phía thiên nhiên. Tiếp tục bảo vệ môi trường nhé!',
+      neutral:'Hành trình bảo vệ rừng cần nhiều người tham gia hơn. Tìm hiểu VQG Cát Tiên!',
+      bad:'Đôi khi chúng ta đến quá muộn. Nhưng nhận thức là bước đầu tiên của thay đổi.',
+    };
+    this.add.text(W/2,H-100,msgByEnding[ending],{fontSize:'12px',fontFamily:'Arial',color:'#aaccaa',wordWrap:{width:530},align:'center'}).setOrigin(0.5).setDepth(6);
+
+    // Replay button
+    const rb=this.add.rectangle(W/2,H-48,160,36,0x1a4a10).setStrokeStyle(1.5,0x3a7a28).setDepth(6).setInteractive({useHandCursor:true});
+    this.add.text(W/2,H-48,'🔄 Chơi lại',{fontSize:'13px',fontFamily:'Arial',color:'#fff'}).setOrigin(0.5).setDepth(7);
+    rb.on('pointerdown',()=>{
+      // Reset
+      GS.score=0;GS.trust=30;GS.evidence=0;GS.decisions=[];GS.inventory=['camera'];
+      this.cameras.main.fadeOut(500,0,0,0);
+      this.cameras.main.once('camerafadeoutcomplete',()=>this.scene.start('Chapter2'));
+    });
+    rb.on('pointerover',()=>rb.setFillStyle(0x2a6a18));
+    rb.on('pointerout',()=>rb.setFillStyle(0x1a4a10));
+
+    this.cameras.main.fadeIn(700);
+  }
+
+  getEnding(){
+    const pts=(GS.score>=800?2:GS.score>=400?1:0)
+      +(GS.trust>=60?2:GS.trust>=30?1:0)
+      +(GS.evidence>=4?2:GS.evidence>=2?1:0)
+      +(GS.inventory.includes('report')?1:0);
+    if(pts>=6)return 'good';if(pts>=3)return 'neutral';return 'bad';
+  }
+}
+
+// ─── GAME CONFIG ─────────────────────────────────────────────────────────
+const config={
+  type:Phaser.AUTO,
+  width:W,height:H,
+  parent:'game',
+  backgroundColor:'#0a1205',
+  scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},
+  physics:{default:'arcade',arcade:{gravity:{x:0,y:0},debug:false}},
+  scene:[BootScene,Chapter2Scene,DialogScene,EndingScene],
+};
+
+window.addEventListener('load',()=>{
+  new Phaser.Game(config);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  background: #020C04;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
+
+#wrap {
+  position: relative;
+  box-shadow:
+    0 0 60px rgba(30,120,30,0.25),
+    0 0 120px rgba(10,60,10,0.15);
+  border-radius: 4px;
+}
+
+#c {
+  display: block;
+  border-radius: 4px;
+  cursor: pointer;
+}
