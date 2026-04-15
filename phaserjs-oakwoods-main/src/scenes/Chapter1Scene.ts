@@ -36,6 +36,10 @@ export class Chapter1Scene extends Phaser.Scene {
 
   private hintText!: Phaser.GameObjects.Text;
 
+  // ── Audio ──────────────────────────────────────────────────────────────────
+  // Hold a reference so we can stop / restart cleanly without calling stopAll()
+  private ambientSound: Phaser.Sound.BaseSound | null = null;
+
   // Jump state (used when Player entity doesn't expose jump directly)
   private playerBody!: Phaser.Physics.Arcade.Body;
   private jumpKey!: Phaser.Input.Keyboard.Key;
@@ -87,7 +91,30 @@ export class Chapter1Scene extends Phaser.Scene {
       this.game.events.emit('notify', 'WASD/←→ di chuyển  •  SPACE nhảy  •  E tương tác  •  C chụp ảnh', '#88ff66');
     });
 
-    try { this.sound.play('forest-ambient', { loop: true, volume: 0.12 }); } catch (_) {}
+    this.startAmbient();
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  AUDIO HELPERS
+  // ═══════════════════════════════════════════════════════════════════
+  private startAmbient(): void {
+    if (!this.cache.audio.has('forest-ambient')) return;
+    // Prevent stacking: destroy any previously running instance
+    if (this.ambientSound?.isPlaying) return;
+    this.ambientSound = this.sound.add('forest-ambient', { loop: true, volume: 0.18 });
+    this.ambientSound.play();
+  }
+
+  private stopAmbient(): void {
+    if (this.ambientSound?.isPlaying) {
+      this.ambientSound.stop();
+    }
+    this.ambientSound = null;
+  }
+
+  private playSfx(key: string, volume = 0.5): void {
+    if (!this.cache.audio.has(key)) return;
+    this.sound.play(key, { volume });
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -396,6 +423,7 @@ export class Chapter1Scene extends Phaser.Scene {
     if (this.canJump && Phaser.Input.Keyboard.JustDown(this.jumpKey)) {
       body.setVelocityY(-520);
       this.canJump = false;
+      this.playSfx('jump', 0.35);
       // Visual hop feedback — use relative scale so real sprites (scale ~0.083)
       // don't explode to 85% of screen height
       this.tweens.add({
@@ -452,7 +480,8 @@ export class Chapter1Scene extends Phaser.Scene {
     this.burstParticles(this.deerX, this.deerY, 0x88ff66, 20);
     this.burstParticles(this.deerX + 20, this.deerY - 15, 0xffd700, 12);
     this.game.events.emit('notify', '🦌 Đã cứu hươu! +120 điểm • Nhận máy ảnh', '#88ff66');
-    try { this.sound.play('success', { volume: 0.5 }); } catch (_) {}
+    this.playSfx('collect', 0.45);  // item received in inventory
+    this.time.delayedCall(300, () => this.playSfx('success', 0.5)); // task complete fanfare
     this.time.delayedCall(3000, () => {
       this.game.events.emit('notify', 'Con hươu quay lại… dẫn đường vào rừng sâu!', '#aaccff');
     });
@@ -476,11 +505,13 @@ export class Chapter1Scene extends Phaser.Scene {
     this.tweens.add({ targets: flash, alpha: 0, duration: 400, onComplete: () => flash.destroy() });
 
     this.game.events.emit('notify', `📷 Bằng chứng ${this.evidenceCount}/${this.maxEvidence} — +150 điểm`, '#f5c518');
-    try { this.sound.play('collect', { volume: 0.4 }); } catch (_) {}
+    this.playSfx('camera', 0.5);   // shutter click on photo
+    this.time.delayedCall(200, () => this.playSfx('collect', 0.35)); // evidence item added
 
     if (this.evidenceCount >= this.maxEvidence) {
       this.time.delayedCall(800, () => {
         this.game.events.emit('notify', '✅ Đủ bằng chứng! Tiếp tục về phía khu điều tra.', '#88ff66');
+        this.playSfx('success', 0.5); // all evidence collected — mission step done
       });
     }
   }
@@ -525,7 +556,7 @@ export class Chapter1Scene extends Phaser.Scene {
   // ═══════════════════════════════════════════════════════════════════
   private goToChapter2(): void {
     this.gs.set('ch1Done', true);
-    try { this.sound.stopAll(); } catch (_) {}
+    this.stopAmbient();
     this.cameras.main.fadeOut(800, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.stop('UIScene');
@@ -534,7 +565,9 @@ export class Chapter1Scene extends Phaser.Scene {
     });
   }
 
-  shutdown(): void {}
+  shutdown(): void {
+    this.stopAmbient();
+  }
 
 
   

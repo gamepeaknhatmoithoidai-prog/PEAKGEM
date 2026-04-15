@@ -52,51 +52,160 @@ export const DIALOGS: Record<string, Dialog> = {
       text: 'GPS không có tín hiệu trong đó. Anh sẽ lạc trong 20 phút.' },
   ],
 
-
-  // 'gate-patient': [
-  //   { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-  //     text: 'Hmm... Biết im lặng — điều đó hiếm thấy ở người thành phố.' },
-  //   { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-  //     text: 'Được rồi. Ba luật: không bẻ cây vô cớ, không làm ồn, không chạm vào thú hoang khi chưa hỏi tôi. Rõ chưa?' },
-  //   { speaker: '{name}',
-  //     text: 'Rõ ạ. Cảm ơn anh K\'Brơi.' },
-  //   { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-  //     text: 'Đừng cảm ơn vội. Rừng tự có cách đánh giá người. Theo tôi.' },
-  // ],
-
-  // 'gate-eager': [
-  //   { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-  //     text: 'Ai cũng nói vậy. Nhưng ít người thực sự học được gì khi ra đây.' },
-  //   { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-  //     text: 'Vào đi. Đừng đi khỏi tầm nhìn của tôi.' },
-  // ],
-
-  // 'gate-pushy': [
-  //   { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-  //     text: '...' },
-  //   { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-  //     text: 'Giấy phép không thay thế được sự tôn trọng. Vào đi. Nhưng tôi sẽ theo dõi từng bước.' },
-  // ],
-
   // ── CÂY RỪNG / PLANTS ────────────────────────────────────────────────
   'plant-intro': [
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: '[chỉ vào cây] Cây cẩm lai. Hơn 150 năm. Người Mạ không chặt cây này. Không bao giờ.' },
+      text: '[chỉ vào cây] Cây cẩm lai này hơn trăm năm rồi, người ngoài nhìn vào thì thấy gỗ quý, còn tụi tôi quen coi nó như một phần của rừng nên không ai nghĩ tới chuyện chặt.' },
     { speaker: '{name}',
-      text: 'Vì sao? Gỗ đẹp lắm mà.' },
+      text: 'Nhìn vậy mà ở đây vẫn để nó yên như vậy hoài luôn à, không ai từng muốn lấy nó về sao?' },
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Vì nó không thuộc về mình...' },
+      text: 'Có chứ, ai cũng từng nghĩ qua thôi, nhưng rồi hiểu ra là có những thứ nếu mình lấy đi thì thứ mất không chỉ là cái cây, mà là cả phần rừng đã giữ nó ở đây từng ấy năm.' },
   ],
+T LAM TU DAY
+// --- CẢNH 1.2: NHÀ BÀ YA K'BEN ---
+  'scene_1_2': [
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Bà hỏi anh có ăn được cơm bếp củi không. Tôi nói có. Đúng không?' },
+    { speaker: '{name}', 
+      text: 'Đúng, cảm ơn bà.' },
+    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
+      text: '[cười] Ngồi đây đi cháu. Tay bà bận nhưng miệng còn rảnh.' },
+    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
+      text: 'Du lịch. Khách đến, chụp ảnh, đi. Chưa ai hỏi mình hiểu họ cần gì không. Cháu hiểu người Mạ cần gì không?' },
+    { speaker: '{name}', 
+      text: 'Thật ra... không. Đó là lý do cháu đến ' },
+    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
+      text: '[gật đầu] Câu đó tốt hơn cái luận văn của cháu đó. Muốn học không? Tay rảnh thì làm cùng bà đi. },
+      choices: [
+        { text: 'May khoảng cách xa, có đoạn lỏng có đoạn chặt ',
+          trust: 0, score: 0, next: 'choice 1', decision: 'gate_patient' },
+        { text: 'May khoảng cách tương đối đều, vẫn có một số chỗ có khoảng cách không bằng nhau. "',
+          trust: 0, score: 0, next: 'choice 2', decision: 'gate_eager' },
+        { text: 'Nghe theo hướng dẫn của bà Yă K\'Ben, khoảng cách may đều, sợi chỉ giữ chặt từng lớp vải ',
+          trust: 0, score: 10, next: 'choice 3', decision: 'gate_pushy' },
+      ],
+    },
+  ],
+    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
+      text: 'Dệt không khó. Khó là giữ được đường may đều và chắc.' },
+    { speaker: '{name}', 
+      text: 'Cháu phải làm thế nào?' },
+    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
+      text: 'Nhìn tay bà. Đều tay, đều sợi. Đừng vội.},
 
-  'plant-success': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Đúng rồi. Không tệ cho người lần đầu vào rừng.' },
-  ],
+// --- 1.3 - Nhà bà YA KBEN 2 ---
+  'forest_gathering': [
+    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben', 
+        text: 'Đi vào rừng, hái giúp bà ít nguyên liệu để nhuộm vải.' },
+    {speaker: '{name}', 
+        text: 'Cháu cần lấy những gì?' },
+    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben', 
+        text: 'Miễn là để nhuộm vải là được, ta không kén chọn. Tuy nhiên, nhìn kĩ rồi chọn.' },
+    {speaker: '{name}', 
+        text: 'Mình nên hái những cái gì đây?',},
+      choices: [
+       { text: 'Củ nghệ và Lá cây giá tỵ', 
+                trust: 0, score: 10, next: 'gather_success', decision: 'gather_correct' },
+       { text: 'Củ nghệ và Gõ đỏ', 
+                trust: 0, score: 10, next: 'gather_fail', decision: 'gather_wrong_1'},
+       { text: 'Lá cây giá tỵ và Giáng hương', 
+                trust: 0, score: 0, next: 'gather_fail', decision: 'gather_wrong_2' },
+       { text: 'Gõ đỏ và Giáng hương', 
+                trust: 0, score: 0, next: 'gather_fail', decision: 'gather_wrong_3' },
+          
+        ],
+    },
+ Chọn đúng 2 loại nguyên liệu +10 điểm, +0 điểm nếu chọn 1 đúng 1 sai hoặc 2 sai. T KO BIẾT LÀM
 
-  'plant-fail': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Sai. Đây là lý do người lạ không tự vào rừng được — dùng sai cây có thể gây độc hoặc vô dụng.' },
-  ],
+ // 1.4 - Ven Rừng ---
+ 'scene_1_4': [
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi', 
+        text: '[giọng thấp] Bẫy. Không phải người làng đặt. Còn mới.' },
+    { speaker: '{name}', 
+        text: 'Mình có gỡ ra được không?'},
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi', 
+        text: 'Cẩn thận. Anh giữ thân nó, tôi gỡ dây.',}
+      choices: [
+      { text: '[MINI-GAME: Gỡ bẫy cho hươu] - Ấn phím E đúng lúc', 
+               trust: 0, score: 15, next: 'scene_1_4_success', decision: 'trap_cleared' },
+        ],
+    },
+'scene_1_4_success': [
+    { speaker: 'Dẫn chuyện', 
+        text: 'Sau khi gỡ, con hươu dừng lại ở mép bụi. Nhìn lại. Rồi biến mất.' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi', 
+        text: 'Nó nhớ mặt người.' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi', 
+        text: '[nói nhỏ]: Không phải tôi nói. Ông tôi nói.'},
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi', 
+        text: 'Từ đầu mùa khô đến nay tôi thấy 7 cái như thế này' },
+    { speaker: '{name}', 
+        text: 'Anh báo kiểm lâm chưa?'},
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi', 
+        text: 'Rồi và không có gì xảy ra.' },
+],
+
+ // 1.5 - Góc rừng yên tĩnh ---
+ mini game Khó quá ko biết làm
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi', 
+        text: 'Bò tót xuống gần làng ban ngày, trong rừng đang có tiếng động làm nó sợ. [nhìn về rừng sâu] Cùng hướng với vết máy móc tuần trước.' },
+    { speaker: '{name}', 
+        text: ' Anh đang nói có người đang làm gì đó trong rừng?'},
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi', 
+        text: '[không trả lời] Anh chụp được ảnh bò tót là tốt. Lưu lại đi.' },
+
+// 1.6 - Nhà bà Ya K'Ben ---
+'scene_1_6': [
+    { 
+        speaker: '{name}', 
+        text: 'Cái vết sơn đỏ trên cây — anh biết từ bao giờ?' 
+    },
+    { 
+        speaker: 'K\'Brơi', portrait: 'npc-kbroi', 
+        text: 'Hai tuần trước. Tôi đi kiểm tra một mình.' 
+    },
+    { 
+        speaker: '{name}', 
+        text: 'Anh đã báo ai chưa?' 
+    },
+    { 
+        speaker: 'K\'Brơi', portrait: 'npc-kbroi', 
+        text: 'Kiểm lâm Hùng. Quen nhà này từ hồi tôi còn nhỏ. Ông ấy bảo để xem. Hai tuần. Không có gì. [ngừng] Tôi không biết ông ấy không làm được — hay không muốn làm.' 
+    },
+    { 
+        speaker: 'K\'Brơi', portrait: 'npc-kbroi', 
+        text: '[lần đầu tiên nhìn thẳng, không dò xét] Tôi cần ai đó không thuộc nơi này giữ bằng chứng. Người trong làng có thể bị ép. Anh thì không. [ngừng] Anh ở lại thêm được không?',
+        choices: [
+            { 
+                text: '"Tôi ở lại. Và tôi muốn hiểu hết chuyện đang xảy ra."', 
+                trust: 10, score: 25, next: 'choice_1_6_A', decision: 'stay_resolve' 
+            },
+            { 
+                text: '"Tôi cần nghĩ thêm. Đây không phải việc của luận văn nữa rồi."', 
+                trust: 5, score: 10, next: 'choice_1_6_B', decision: 'stay_hesitant' 
+            },
+        ],
+    },
+],
+
+'choice 1': [
+    { 
+        speaker: 'K\'Brơi', portrait: 'npc-kbroi', 
+        text: 'Ngủ sớm đi. Sáng mai 5h mình đi.' 
+    },
+],
+
+'choice 2': [
+    { 
+        speaker: 'K\'Brơi', portrait: 'npc-kbroi', 
+        text: 'Đúng. Nếu anh không chắc — đừng ở lại. Nửa vời còn tệ hơn không làm.' 
+    },
+    { 
+        speaker: 'Dẫn chuyện', 
+        text: 'Thuận một mình nhìn rừng đêm và quyết định ở lại.' 
+    },
+],
+// Tao Dừng Ngang Ni
 
   // ── BẪY / TRAP ───────────────────────────────────────────────────────
   'trap-found': [

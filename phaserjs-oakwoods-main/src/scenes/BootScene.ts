@@ -39,6 +39,17 @@ const IMAGES: { key: string; path: string }[] = [
   { key: 'caycamlai', path: 'assets/game/Caycamlai.jpg' },
 ];
 
+// ─── Audio ──────────────────────────────────────────────────────────────────
+const AUDIO: { key: string; path: string }[] = [
+  // Chapter 1 forest ambient — loops as background music
+  { key: 'forest-ambient', path: 'assets/audio/forest-ambient.mp3'  },
+  // SFX — Chapter 1 interactions
+  { key: 'jump',    path: 'assets/audio/jump sound.mp3'    },
+  { key: 'success', path: 'assets/audio/success sound.mp3' },
+  { key: 'camera',  path: 'assets/audio/camera sound.mp3'  },
+  { key: 'collect', path: 'assets/audio/collect sound.wav' },
+];
+
 export class BootScene extends Phaser.Scene {
   constructor() { super({ key: 'BootScene' }); }
 
@@ -69,6 +80,9 @@ export class BootScene extends Phaser.Scene {
     }
     for (const img of IMAGES) {
       this.load.image(img.key, img.path);
+    }
+    for (const aud of AUDIO) {
+      this.load.audio(aud.key, aud.path);
     }
   }
 
