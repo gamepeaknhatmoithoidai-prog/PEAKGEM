@@ -30,12 +30,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (this._hasAnims) {
       // Measured frame sizes: player-m=576×576, player-f=554×624 (3-col×4-row sheets).
-      // scale 0.18 → frame display ≈ 104 px tall; visible character ≈ 90 px on 540 px canvas.
-      // body.setSize/Offset are in LOCAL (un-scaled) frame pixels.
+      // scale 0.15 → frame display ≈ 86 px tall; matches NPC scale 0.15.
+      // body.setSize/Offset are in LOCAL (un-scaled) frame pixels and auto-scale.
       // Body bottom placed at character feet:
-      //   male:   feet ≈ frame y=540 → offset_y=220, height=320 → body.bottom=world_y+45px
-      //   female: feet ≈ frame y=564 → offset_y=244, height=320 → body.bottom=world_y+45px
-      this.setScale(0.18);
+      //   male:   feet ≈ frame y=540 → offset_y=220, height=320 → body.bottom=world_y+37px
+      //   female: feet ≈ frame y=564 → offset_y=244, height=320 → body.bottom=world_y+37px
+      this.setScale(0.15);
       const body = this.body as Phaser.Physics.Arcade.Body;
       if (gender === 'male') {
         // player-m 576×576: character centered, feet at local y≈540

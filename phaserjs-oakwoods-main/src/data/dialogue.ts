@@ -295,6 +295,78 @@ export const DIALOGS: Record<string, Dialog> = {
       text: 'Đi qua bằng chứng như vậy... Không có bằng chứng thì nói ai nghe?' },
   ],
 
+  // ── CHƯƠNG 2 — CÁC CẢNH MỚI ─────────────────────────────────────────
+  // Exact dialogue text from game design document (GAME C2.docx)
+
+  // ── Cảnh 1: Thu Thập Manh Mối ──────────────────────────────────────
+  'c2s1-intro': [
+    { speaker: '{name}',
+      text: 'K\'Brơi, hôm nay mình đi tuyến nào? Em cần ghi vào nhật ký thực địa.' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Đứng lại.' },
+    { speaker: '{name}',
+      text: 'Dây đo khảo sát? Ai đo gì ở đây vậy?' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Câu hỏi đúng rồi đó.' },
+  ],
+
+  'c2s1-postgame': [
+    { speaker: '{name}',
+      text: 'Dây đo, GPS, dấu đánh cây… tất cả đều cùng một hướng. Đây không phải ngẫu nhiên.' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Con đường này… trước đây không có.' },
+    { speaker: '{name}',
+      text: 'Nhưng trong hồ sơ Vườn Quốc gia cũng không có dự án nào ở đây.' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Không có. Chính thức là vậy.' },
+  ],
+
+  // ── Cảnh 2: Chạy Trốn / Runner ─────────────────────────────────────
+  'c2s2-intro': [
+    { speaker: '{name}',
+      text: 'K\'Brơi, tôi cần chụp cái cọc khảo sát kia—' },
+    { speaker: 'Công nhân',
+      text: 'Ê! Đứng lại! Mày là ai? Chụp gì ở đây?' },
+  ],
+
+  'c2s2-postgame': [
+    { speaker: '{name}',
+      text: 'Họ đang làm gì ở đây mà hung hăng vậy? Rừng quốc gia mà!' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Đó là lý do họ không muốn bị chụp ảnh.' },
+    { speaker: '{name}',
+      text: 'Mình cần thêm bằng chứng. Nhưng bây giờ họ biết mặt rồi.' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Tối mình đi lại. Trong đêm — tôi không quen. Nhưng anh muốn không?' },
+    { speaker: '{name}',
+      text: 'Muốn.' },
+  ],
+
+  // ── Cảnh 3: Chụp Ảnh Bằng Chứng ───────────────────────────────────
+  'c2s3-intro': [
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Đừng lại gần. Ghi lại những gì cần thiết thôi.' },
+    { speaker: '{name}',
+      text: 'Em sẽ chụp. Nhưng phải nhanh.' },
+  ],
+
+  'c2s3-postgame': [
+    { speaker: '{name}',
+      text: 'Có rồi… nhưng chưa đủ.' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Chừng này… chỉ đủ để nghi ngờ.' },
+  ],
+
+  // ── Cảnh 4: Ẩn Náu & Di Chuyển Cẩn Thận ───────────────────────────
+  'c2s4-intro': [
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Đặt gót xuống trước. Cảm nhận đất. Rồi mới đặt cả bàn chân.' },
+    { speaker: '{name}',
+      text: 'Như này à... nhẹ hơn rồi.' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Đứng. Đừng thở mạnh.' },
+  ],
+
   // ── CHƯƠNG 2 ──────────────────────────────────────────────────────────
   'ch2-intro': [
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
