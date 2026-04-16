@@ -114,9 +114,9 @@ export class NPC extends Phaser.GameObjects.Container {
   }
 
   /** Walk horizontally to a target x, then stop. */
-  walkTo(targetX: number, speed = 60): void {
+  walkTo(targetX: number, speed = 60, onArrive?: () => void): void {
     const dx = targetX - this.x;
-    if (Math.abs(dx) < 1) return;
+    if (Math.abs(dx) < 1) { onArrive?.(); return; }
     // Side-view walk frames face left → flip for right-bound motion.
     const goingRight = dx > 0;
     this.sprite.setFlipX(false);
@@ -136,6 +136,7 @@ export class NPC extends Phaser.GameObjects.Container {
         // Keep a side-view frame so he doesn't snap back to front-facing.
         if (this.scene.anims.exists(walkKey)) this.sprite.setFrame(0);
         this.sprite.setFlipX(goingRight);
+        onArrive?.();
       },
     });
   }

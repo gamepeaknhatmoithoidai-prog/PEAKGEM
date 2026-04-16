@@ -21,6 +21,7 @@ export class Chapter1Scene extends Phaser.Scene {
   private ch2PortalFired = false;
   private inDialog = false;
   private _pendingNPC: NPC | null = null;
+  private _lastDialogKey = '';
 
   private deerX = 980; private deerY = 390;
   private deerRescued = false;
@@ -524,8 +525,39 @@ export class Chapter1Scene extends Phaser.Scene {
     this.inDialog = true;
     this.player.freeze();
     this._pendingNPC = npc;
+    this._lastDialogKey = dialogKey;
     this.scene.launch('DialogScene', { dialogKey, sourceScene: 'Chapter1Scene' });
     this.scene.pause();
+  }
+
+  private showConclusion(text: string): void {
+    const cam = this.cameras.main;
+    const cx = cam.width / 2;
+    const cy = cam.height / 2;
+
+    const overlay = this.add.rectangle(cx, cy, cam.width, cam.height, 0x000000, 0.55)
+      .setDepth(DEPTH_UI + 20).setScrollFactor(0).setInteractive();
+
+    const box = this.add.rectangle(cx, cy, 560, 220, 0x1a1a1a, 0.95)
+      .setStrokeStyle(2, 0xf5c518)
+      .setDepth(DEPTH_UI + 21).setScrollFactor(0);
+
+    const label = this.add.text(cx, cy, text, {
+      fontSize: '14px', fontFamily: 'Arial', color: '#ffeebb',
+      align: 'center', wordWrap: { width: 520 },
+      lineSpacing: 4,
+    }).setOrigin(0.5).setDepth(DEPTH_UI + 22).setScrollFactor(0);
+
+    const hint = this.add.text(cx, cy + 95, '[Nhấn bất kỳ phím nào để tiếp tục]', {
+      fontSize: '11px', fontFamily: 'Arial', color: '#aaaaaa',
+    }).setOrigin(0.5).setDepth(DEPTH_UI + 22).setScrollFactor(0);
+
+    const close = () => {
+      overlay.destroy(); box.destroy(); label.destroy(); hint.destroy();
+      this.input.keyboard?.off('keydown', close);
+    };
+    overlay.on('pointerdown', close);
+    this.input.keyboard?.once('keydown', close);
   }
 
   private onDialogDone(result: any): void {
@@ -535,20 +567,39 @@ export class Chapter1Scene extends Phaser.Scene {
 
     if (this._pendingNPC) {
       const npc = this._pendingNPC;
-      if (this._pendingNPC.npcName === "K'Brơi"){
-          npc.markDone();
-          this._pendingNPC.walkTo(920);
-      }
-      this._pendingNPC.markDone();
+      const finishedKey = this._lastDialogKey;
       this._pendingNPC = null;
-      this.time.delayedCall( 5000, () => {
-        npc.setDialogKey('plant-intro');   // bật lại "!" với dialog mới
-      });
+      npc.markDone();
 
+      if (npc.npcName === "K'Brơi") {
+        if (finishedKey === 'gate-kbroi') {
+          npc.walkTo(920);
+          this.time.delayedCall(5000, () => {
+            npc.setDialogKey('plant-intro');   // bật lại "!" với dialog mới
+          });
+        } else if (finishedKey === 'plant-intro') {
+          npc.walkTo(1300, 60, () => {
+            const yakben = this.npcs.find(n => n.npcName === "Bà Yă K'Ben");
+            if (yakben) yakben.setDialogKey('scene_1_2');
+          });
+        }
+      }
+
+      if (finishedKey === 'scene_1_2') {
+        this.time.delayedCall(300, () => {
+          this.showConclusion(
+            '📖 KẾT LUẬN — Rừng trong sợi vải — Người Mạ\n\n' +
+            'Với người Mạ, thổ cẩm không phải đồ thủ công — đó là ngôn ngữ. ' +
+            'Mỗi hoa văn là một ký ức sinh thái. Khi một loài cây mất đi, màu nhuộm mất — ' +
+            'và một phần ngôn ngữ cộng đồng cũng biến mất.'
+          );
+        });
+      }
     }
     if (result?.scoreChange > 0) {
       this.game.events.emit('notify', `+${result.scoreChange} điểm!`, '#f5c518');
     }
+
   }
 
   // ═══════════════════════════════════════════════════════════════════

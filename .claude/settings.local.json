@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls \"f:\\\\\\\\SideProject\\\\\\\\PEAKGEM\\\\\\\\phaserjs-oakwoods-main\\\\\\\\assets\\\\\\\\game\")"
+      "Bash(ls \"f:\\\\\\\\SideProject\\\\\\\\PEAKGEM\\\\\\\\phaserjs-oakwoods-main\\\\\\\\assets\\\\\\\\game\")",
+      "Bash(npx tsc:*)"
     ]
   }
 }

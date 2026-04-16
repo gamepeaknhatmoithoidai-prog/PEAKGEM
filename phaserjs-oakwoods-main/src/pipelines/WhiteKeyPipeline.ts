@@ -10,9 +10,12 @@ const FRAG = `
     float minC = min(c.r, min(c.g, c.b));
     float maxC = max(c.r, max(c.g, c.b));
     float sat  = maxC - minC;
-    // pixels with all channels bright AND low saturation → white background
+    // Near-white pixels → background
     float isWhite = step(0.87, minC) * step(sat, 0.12);
-    gl_FragColor  = mix(c, vec4(0.0, 0.0, 0.0, 0.0), isWhite);
+    // Light grayscale pixels (checkerboard cells ~0.80) → background
+    float isGrayBg = step(0.70, minC) * step(maxC, 0.92) * step(sat, 0.04);
+    float isBg = max(isWhite, isGrayBg);
+    gl_FragColor = mix(c, vec4(0.0, 0.0, 0.0, 0.0), isBg);
   }
 `;
 
