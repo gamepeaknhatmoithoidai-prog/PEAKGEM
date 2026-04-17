@@ -12,6 +12,10 @@ export interface State {
   animalSaved: boolean;
   evidenceCount: number;  // 0–5 (Ch2)
   ch1Done: boolean;
+  // Chapter 2 scene progression: 0=Scene1, 1=Scene2, 2=Scene3, 3=Scene4, 4=done
+  c2Progress: number;
+  runnerHits: number;     // hits recorded in Scene 2 runner
+  photosTaken: number;    // photos taken in Scene 3
 }
 
 const DEFAULTS: State = {
@@ -26,6 +30,9 @@ const DEFAULTS: State = {
   animalSaved: false,
   evidenceCount: 0,
   ch1Done: false,
+  c2Progress: 0,
+  runnerHits: 0,
+  photosTaken: 0,
 };
 
 /** Thin wrapper around Phaser's registry for type-safe access. */

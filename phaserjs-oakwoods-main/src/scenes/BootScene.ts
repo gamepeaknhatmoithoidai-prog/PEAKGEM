@@ -38,6 +38,21 @@ const IMAGES: { key: string; path: string }[] = [
   { key: 'bg-scene',  path: 'assets/game/bg-scene.jpg'  },
   { key: 'caycamlai', path: 'assets/game/Caycamlai.jpg' },
   { key: 'bo-tot',    path: 'assets/bo_tot.png'         },
+  // ── Chapter 2 backgrounds ─────────────────────────────────────────
+  { key: 'bg-c2-real',    path: 'assets/game/bg-c2-real.jpg'        },
+  { key: 'bg-c2-game2',   path: 'assets/game/bg-c2-game2.jpg'       },
+  // ── Chapter 2 collectible / evidence objects (DO HOA / STUFF) ─────
+  // Scene 1 objects
+  { key: 'stuff-tape',   path: 'assets/game/stuff/stuff-tape.png'   },
+  { key: 'stuff-gps',    path: 'assets/game/stuff/stuff-gps.png'    },
+  { key: 'stuff-tree',   path: 'assets/game/stuff/stuff-tree.png'   },
+  { key: 'stuff-gloves', path: 'assets/game/stuff/stuff-gloves.png' },
+  // Scene 3 objects (new evidence)
+  { key: 'stuff-oil',    path: 'assets/game/stuff/stuff-oil.png'    },
+  { key: 'stuff-tracks', path: 'assets/game/stuff/stuff-tracks.png' },
+  { key: 'stuff-map',    path: 'assets/game/stuff/stuff-map.png'    },
+  { key: 'stuff-idcard', path: 'assets/game/stuff/stuff-idcard.png' },
+  { key: 'stuff-saw',    path: 'assets/game/stuff/stuff-saw.png'    },
 ];
 
 // ─── Audio ──────────────────────────────────────────────────────────────────
