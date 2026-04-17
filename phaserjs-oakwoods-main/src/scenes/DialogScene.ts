@@ -26,6 +26,7 @@ export class DialogScene extends Phaser.Scene {
   private continueHint!: Phaser.GameObjects.Text;
   private choiceContainer!: Phaser.GameObjects.Container;
   private choiceBtns: Phaser.GameObjects.Container[] = [];
+  private selectedChoices: Set<number> = new Set();
 
   private typeTimer = 0;
   private waitTimer = 0;
@@ -167,11 +168,15 @@ export class DialogScene extends Phaser.Scene {
   private showChoices(line: Line, playerName: string): void {
     this.choiceContainer.removeAll(true);
     this.choiceBtns = [];
+    this.selectedChoices.clear();
     this.continueHint.setVisible(false);
 
     const choices = line.choices!;
-    const startY = H - 145 - (choices.length * 38);
+    const isMulti = !!line.multiSelect;
+    const needed = line.selectCount ?? 1;
+    const startY = H - 145 - (choices.length * 38) - (isMulti ? 40 : 0);
 
+    // Choice buttons
     choices.forEach((ch, i) => {
       const bg = this.add.rectangle(0, 0, W - 80, 32, 0x0d2508, 0.9)
         .setStrokeStyle(1, 0x3a7a28);
@@ -183,21 +188,102 @@ export class DialogScene extends Phaser.Scene {
       const btn = this.add.container(W / 2, startY + i * 38, [bg, label])
         .setSize(W - 80, 32).setInteractive({ useHandCursor: true });
 
-      btn.on('pointerover', () => { bg.setFillStyle(0x1a4a10); label.setColor('#ffffff'); });
-      btn.on('pointerout', () => { bg.setFillStyle(0x0d2508); label.setColor('#cceeaa'); });
-      btn.on('pointerdown', () => this.selectChoice(line, i, playerName));
+      if (isMulti) {
+        // Toggle selection on click
+        btn.on('pointerdown', () => {
+          if (this.selectedChoices.has(i)) {
+            // Deselect
+            this.selectedChoices.delete(i);
+            bg.setFillStyle(0x0d2508).setStrokeStyle(1, 0x3a7a28);
+            label.setColor('#cceeaa');
+          } else if (this.selectedChoices.size < needed) {
+            // Select
+            this.selectedChoices.add(i);
+            bg.setFillStyle(0x1a4a10).setStrokeStyle(2, 0x88ff66);
+            label.setColor('#ffffff');
+          }
+          // Update confirm button state
+          confirmLabel.setColor(this.selectedChoices.size === needed ? '#ffffff' : '#666666');
+          confirmBg.setStrokeStyle(1, this.selectedChoices.size === needed ? 0x88ff66 : 0x3a7a28);
+        });
+        btn.on('pointerover', () => { if (!this.selectedChoices.has(i)) bg.setFillStyle(0x162e10); });
+        btn.on('pointerout',  () => { if (!this.selectedChoices.has(i)) bg.setFillStyle(0x0d2508); });
+      } else {
+        btn.on('pointerover', () => { bg.setFillStyle(0x1a4a10); label.setColor('#ffffff'); });
+        btn.on('pointerout',  () => { bg.setFillStyle(0x0d2508); label.setColor('#cceeaa'); });
+        btn.on('pointerdown', () => this.selectSingle(line, i, playerName));
+      }
 
       this.choiceContainer.add(btn);
       this.choiceBtns.push(btn);
     });
+
+    // Confirm button — only shown in multi-select mode
+    const confirmBg = this.add.rectangle(0, 0, 160, 30, 0x0d2508, 0.95)
+      .setStrokeStyle(1, 0x3a7a28);
+    const confirmLabel = this.add.text(0, 0, `Xác nhận (chọn ${needed})`, {
+      fontSize: '12px', fontFamily: 'Arial', color: '#666666',
+    }).setOrigin(0.5);
+
+    const confirmBtn = this.add.container(W / 2, startY + choices.length * 38 + 4, [confirmBg, confirmLabel])
+      .setSize(160, 30).setInteractive({ useHandCursor: true });
+
+    confirmBtn.on('pointerdown', () => {
+      if (this.selectedChoices.size !== needed) return;
+      this.confirmMultiSelect(line, playerName);
+    });
+
+    if (isMulti) {
+      this.choiceContainer.add(confirmBtn);
+    } else {
+      confirmBtn.setVisible(false);
+    }
   }
 
-  private selectChoice(line: Line, idx: number, playerName: string): void {
+  // Confirm multi-select: multiply selected scores together × 10.
+  // Any wrong pick (score 0) makes the whole result 0.
+  private confirmMultiSelect(line: Line, playerName: string): void {
+    const choices = line.choices!;
+    const decisions: string[] = [];
+    let scoreProduct = 1;
+
+    this.selectedChoices.forEach(i => {
+      const ch = choices[i];
+      scoreProduct *= (ch.score ?? 0);
+      if (ch.decision) decisions.push(ch.decision);
+    });
+
+    const totalScore = 10 * scoreProduct;
+    if (totalScore) this.gs.addScore(totalScore);
+    decisions.forEach(d => this.gs.decide(d));
+
+    const pickedCorrect = totalScore > 0;
+    const nextKey = pickedCorrect ? 'gather_success' : 'gather_fail';
+
+    const result = { decisions, totalScore };
+    const src = this.scene.get(this.sourceScene);
+    if (src) src.events.emit('choice-made', result);
+
+    this.choiceContainer.removeAll(true);
+    this.choiceBtns = [];
+    this.selectedChoices.clear();
+
+    if (DIALOGS[nextKey]) {
+      this.lines = DIALOGS[nextKey];
+      this.lineIdx = 0;
+      this.showLine(playerName);
+    } else {
+      this.closeDialog(result);
+    }
+
+    try { this.sound.play('click', { volume: 0.3 }); } catch (_) {}
+  }
+
+  private selectSingle(line: Line, idx: number, playerName: string): void {
     const ch = line.choices![idx];
     this.choiceContainer.removeAll(true);
     this.choiceBtns = [];
 
-    // Apply effects
     const result = {
       choiceIdx: idx,
       trustChange: ch.trust ?? 0,
@@ -209,11 +295,9 @@ export class DialogScene extends Phaser.Scene {
     if (ch.score) this.gs.addScore(ch.score);
     if (ch.decision) this.gs.decide(ch.decision);
 
-    // Notify source scene
     const src = this.scene.get(this.sourceScene);
     if (src) src.events.emit('choice-made', result);
 
-    // Continue to next dialog or close
     if (ch.next && DIALOGS[ch.next]) {
       this.lines = DIALOGS[ch.next];
       this.lineIdx = 0;

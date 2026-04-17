@@ -37,6 +37,7 @@ const IMAGES: { key: string; path: string }[] = [
   { key: 'bg-forest', path: 'assets/game/bg-forest.jpg' },
   { key: 'bg-scene',  path: 'assets/game/bg-scene.jpg'  },
   { key: 'caycamlai', path: 'assets/game/Caycamlai.jpg' },
+  { key: 'bo-tot',    path: 'assets/bo_tot.png'         },
 ];
 
 // ─── Audio ──────────────────────────────────────────────────────────────────

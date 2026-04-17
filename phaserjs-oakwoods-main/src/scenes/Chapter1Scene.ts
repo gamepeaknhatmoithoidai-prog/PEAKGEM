@@ -5,6 +5,7 @@ import { NPC } from '../entities/NPC';
 import {
   MAP_W_CH1, DEPTH_BG, DEPTH_WORLD, DEPTH_FX, DEPTH_UI,
 } from '../constants';
+import { buildDeer } from './build_deer';
 
 const MAP_H    = 540;
 // Ground level: player walks on this Y (bottom ~20% of screen)
@@ -16,6 +17,9 @@ export class Chapter1Scene extends Phaser.Scene {
   private gs!: GS;
   private player!: Player;
   private npcs: NPC[] = [];
+  private npcKbroi!: NPC;
+  private npcAmaknoi!: NPC;
+  private npcYakben!: NPC;
   private colliders!: Phaser.Physics.Arcade.StaticGroup;
 
   private ch2PortalFired = false;
@@ -23,7 +27,62 @@ export class Chapter1Scene extends Phaser.Scene {
   private _pendingNPC: NPC | null = null;
   private _lastDialogKey = '';
 
-  private deerX = 980; private deerY = 390;
+  // Maps each dialog key to the follow-up action that runs after it finishes.
+  // To add a new story beat: add one entry here — onDialogDone never needs to change.
+  private readonly dialogCallbacks: Record<string, (npc: NPC) => void> = {
+    'gate-kbroi': (npc) => {
+      // K'Brơi walks to the plant, then re-enables herself for the next conversation.
+      npc.walkTo(920);
+      this.time.delayedCall(5000, () => npc.setDialogKey('plant-intro'));
+    },
+    'plant-intro': (npc) => {
+      // K'Brơi walks toward Yakben, then unlocks Yakben's next dialog.
+      npc.walkTo(1300, 60, () => {
+        this.npcYakben.setDialogKey('scene_1_2');
+      });
+    },
+    'scene_1_2': (npc) => {
+      
+      this.npcKbroi.hide();
+      // Small delay so the dialog box fully closes before the conclusion card appears.
+      this.time.delayedCall(300, () => {
+        this.showConclusion(
+          '📖 KẾT LUẬN — Rừng trong sợi vải — Người Mạ\n\n' +
+          'Với người Mạ, thổ cẩm không phải đồ thủ công — đó là ngôn ngữ. ' +
+          'Mỗi hoa văn là một ký ức sinh thái. Khi một loài cây mất đi, màu nhuộm mất — ' +
+          'và một phần ngôn ngữ cộng đồng cũng biến mất.'
+        );
+      });
+
+      this.time.delayedCall(5000 , () => {
+        this.npcYakben.walkTo(1550 , 60 , () => {
+          npc.setDialogKey('forest_gathering')
+        })
+      })
+    },
+    'forest_gathering' : (npc) => {
+      this.time.delayedCall(1000, () => {
+          this.npcKbroi.show(1600)
+          this.startDialog('call_help' , this.npcKbroi)
+          this.npcKbroi.walkTo(1850 , 60 , () => {
+              this.npcKbroi.setDialogKey('scene_1_4')
+          })
+      })
+    },
+
+    'scene_1_4_success' :(npc) =>{
+      this.showConclusion(  
+          '📖 KẾT LUẬN — Bẫy và luật tục người Mạ\n\n' +
+          'Người Mạ có luật tục về săn bắt: không đặt bẫy gần nguồn nước, không bẫy vào mùa ' +
+          'sinh sản, không lấy nhiều hơn mức cần. Bẫy dây thép công nghiệp này không phải của ' +
+          'người làng — đây là loại người ngoài mang vào, đặt bất hợp pháp trong khu rừng đệm.'
+      )
+      this.npcKbroi.setDialogKey('after_secure')
+    }
+    
+  };
+
+  private deerX = 1940; private deerY = 390;
   private deerRescued = false;
   private deerRescuing = false;
   private deerProgress = 0;
@@ -60,11 +119,14 @@ export class Chapter1Scene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, MAP_W_CH1, MAP_H);
 
     this.buildWorld();
-    // this.buildDeer();
+    const d = buildDeer(this, this.deerX, this.deerY);
+    this.deerImg = d.deerImg;
+    this.deerProgressBg = d.deerProgressBg;
+    this.deerProgressFill = d.deerProgressFill;
     this.buildNPCs();
 
     const gender = this.gs.get('gender') || 'male';
-    this.player = new Player(this, 80, GROUND_Y - 60, gender);
+    this.player = new Player(this, 1800, GROUND_Y - 60, gender);
     this.playerBody = this.player.body as Phaser.Physics.Arcade.Body;
     this.playerBody.setCollideWorldBounds(true);
     this.playerBody.setMaxVelocityY(900);
@@ -299,14 +361,7 @@ export class Chapter1Scene extends Phaser.Scene {
     b.setDisplaySize(w, h).setVisible(false).refreshBody();
   }
 
-  // ═══════════════════════════════════════════════════════════════════
-  //  DEER — moved to ./build_deer.ts
-  //  To re-enable: import { buildDeer } from './build_deer';
-  //  then in create():
-  //    const d = buildDeer(this, this.deerX, this.deerY);
-  //    this.deerImg = d.deerImg;
-  //    this.deerProgressBg = d.deerProgressBg;
-  //    this.deerProgressFill = d.deerProgressFill;
+
   // ═══════════════════════════════════════════════════════════════════
   //  NPCs
   // ═══════════════════════════════════════════════════════════════════
@@ -318,13 +373,16 @@ export class Chapter1Scene extends Phaser.Scene {
     //   feet at 90 % of frame → world offset 1024*0.9/2*0.11 ≈ 51 px → y = GROUND_Y - 51.
     const defs = [
       { key: 'npc-kbroi',   x: 460,  y: GROUND_Y - 46, name: "K'Brơi",      dialog: 'gate-kbroi',    scale: 0.15 },
-      { key: 'npc-amaknoi', x: 1800, y: GROUND_Y - 46, name: "Ama K'Nơi",   dialog: 'amaknoi-first', scale: 0.15 },
-      { key: 'npc-yakben',  x: 1340, y: GROUND_Y - 46, name: "Bà Yă K'Ben", dialog: 'yakben-first',  scale: 0.15 },
+      // { key: 'npc-amaknoi', x: 1800, y: GROUND_Y - 46, name: "Ama K'Nơi",   dialog: 'amaknoi-first', scale: 0.15 },
+      { key: 'npc-yakben',  x: 1340, y: GROUND_Y - 46, name: "Bà Yă K'Ben",  scale: 0.15 },
     ];
     for (const d of defs) {
       const npc = new NPC(this, { textureKey: d.key, x: d.x, y: d.y, name: d.name, dialogKey: d.dialog, scale: d.scale });
       npc.startIdleAnim();
       this.npcs.push(npc);
+      if (d.key === 'npc-kbroi')   this.npcKbroi   = npc;
+      if (d.key === 'npc-amaknoi') this.npcAmaknoi = npc;
+      if (d.key === 'npc-yakben')  this.npcYakben  = npc;
     }
   }
 
@@ -348,7 +406,7 @@ export class Chapter1Scene extends Phaser.Scene {
     // Deer rescue — only active when buildDeer() has been called
     const deerEnabled = !!this.deerImg;
     const nearDeer = deerEnabled && !this.deerRescued &&
-      Phaser.Math.Distance.Between(px, py, this.deerX, this.deerY) < 70;
+      Phaser.Math.Distance.Between(px, py, this.deerX, this.deerY) < 30;
 
     // NPC proximity
     let nearNPC: NPC | null = null;
@@ -356,16 +414,20 @@ export class Chapter1Scene extends Phaser.Scene {
       if (npc.checkProximity(px, py)) { nearNPC = npc; break; }
     }
 
-    // Evidence zone
+    // Evidence zone (Chup Anh)
     this.evidenceZoneActive = px > 2100 && px < 2800 && this.evidenceCount < this.maxEvidence;
 
     // Chapter-2 portal
     const nearPortal = !this.ch2PortalFired && px > 3050 && px < 3210;
 
+    // Inspect object at x=2100
+    const nearGuessImage = Math.abs(px - 2100) < 60;
+
     // Hint
     let hint = '';
     if (nearDeer)                         hint = this.deerRescuing ? '' : '🦌 Giữ E để gỡ bẫy cho hươu';
     else if (nearNPC && !nearNPC.isDone)  hint = `💬 E — Nói chuyện với ${nearNPC.npcName}`;
+    else if (nearGuessImage)              hint = '🔍 E — Quan sát';
     else if (this.evidenceZoneActive)     hint = `📷 C — Chụp bằng chứng (${this.evidenceCount}/${this.maxEvidence})`;
     else if (nearPortal)                  hint = '➜ E — Tiếp tục sang Khu điều tra';
 
@@ -382,6 +444,10 @@ export class Chapter1Scene extends Phaser.Scene {
     // E key actions
     if (this.player.isInteractJustPressed()) {
       if (nearNPC && !nearNPC.isDone) { this.startDialog(nearNPC.dialogKey, nearNPC); return; }
+      if (nearGuessImage) { 
+        this.startDialog('guess_image', null)
+        this.npcKbroi.setDialogKey('scene_1_5') 
+        return; }
       if (nearPortal) { this.ch2PortalFired = true; this.goToChapter2(); return; }
     }
 
@@ -484,8 +550,10 @@ export class Chapter1Scene extends Phaser.Scene {
     this.playSfx('collect', 0.45);  // item received in inventory
     this.time.delayedCall(300, () => this.playSfx('success', 0.5)); // task complete fanfare
     this.time.delayedCall(3000, () => {
-      this.game.events.emit('notify', 'Con hươu quay lại… dẫn đường vào rừng sâu!', '#aaccff');
+          this.startDialog('scene_1_4_success' , this.npcKbroi)
     });
+    
+
   }
 
   private collectEvidence(px: number, _py: number): void {
@@ -530,7 +598,7 @@ export class Chapter1Scene extends Phaser.Scene {
     this.scene.pause();
   }
 
-  private showConclusion(text: string): void {
+  private showConclusion(text: string, onClose?: () => void): void {
     const cam = this.cameras.main;
     const cx = cam.width / 2;
     const cy = cam.height / 2;
@@ -555,51 +623,37 @@ export class Chapter1Scene extends Phaser.Scene {
     const close = () => {
       overlay.destroy(); box.destroy(); label.destroy(); hint.destroy();
       this.input.keyboard?.off('keydown', close);
+      onClose?.();
     };
     overlay.on('pointerdown', close);
     this.input.keyboard?.once('keydown', close);
   }
 
+  // Called by DialogScene via this.events.emit('dialog-done', result) when the player closes a conversation.
+  // result may carry { scoreChange: number } or be undefined.
   private onDialogDone(result: any): void {
+    // Chapter1Scene was paused while DialogScene was active — resume it now.
     this.scene.resume();
+    // Re-enable the update() loop (it early-returns while inDialog is true).
     this.inDialog = false;
+    // Allow the player sprite to accept movement input again.
     this.player.unfreeze();
 
+    // Only run follow-up logic when the dialog was started by interacting with an NPC.
     if (this._pendingNPC) {
       const npc = this._pendingNPC;
       const finishedKey = this._lastDialogKey;
       this._pendingNPC = null;
       npc.markDone();
 
-      if (npc.npcName === "K'Brơi") {
-        if (finishedKey === 'gate-kbroi') {
-          npc.walkTo(920);
-          this.time.delayedCall(5000, () => {
-            npc.setDialogKey('plant-intro');   // bật lại "!" với dialog mới
-          });
-        } else if (finishedKey === 'plant-intro') {
-          npc.walkTo(1300, 60, () => {
-            const yakben = this.npcs.find(n => n.npcName === "Bà Yă K'Ben");
-            if (yakben) yakben.setDialogKey('scene_1_2');
-          });
-        }
-      }
-
-      if (finishedKey === 'scene_1_2') {
-        this.time.delayedCall(300, () => {
-          this.showConclusion(
-            '📖 KẾT LUẬN — Rừng trong sợi vải — Người Mạ\n\n' +
-            'Với người Mạ, thổ cẩm không phải đồ thủ công — đó là ngôn ngữ. ' +
-            'Mỗi hoa văn là một ký ức sinh thái. Khi một loài cây mất đi, màu nhuộm mất — ' +
-            'và một phần ngôn ngữ cộng đồng cũng biến mất.'
-          );
-        });
-      }
+      // Look up and run the callback for this dialog key — no if/else chains needed.
+      this.dialogCallbacks[finishedKey]?.(npc);
     }
+
+    // If the dialog awarded points, show a brief toast notification.
     if (result?.scoreChange > 0) {
       this.game.events.emit('notify', `+${result.scoreChange} điểm!`, '#f5c518');
     }
-
   }
 
   // ═══════════════════════════════════════════════════════════════════

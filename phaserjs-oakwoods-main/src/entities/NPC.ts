@@ -6,7 +6,7 @@ export interface NPCConfig {
   x: number;
   y: number;
   name: string;
-  dialogKey: string;
+  dialogKey?: string;
   interactRadius?: number;
   scale?: number;
 }
@@ -34,7 +34,7 @@ export class NPC extends Phaser.GameObjects.Container {
 
   constructor(scene: Phaser.Scene, cfg: NPCConfig) {
     super(scene, cfg.x, cfg.y);
-    this._dialogKey = cfg.dialogKey;
+    this._dialogKey = cfg.dialogKey ?? '';
     this.npcName = cfg.name;
     this._radius = cfg.interactRadius ?? INTERACT_RADIUS;
 
@@ -99,6 +99,18 @@ export class NPC extends Phaser.GameObjects.Container {
   get isNear(): boolean { return this._nearPlayer; }
   get dialogKey(): string { return this._dialogKey; }
   get isDone(): boolean { return this._done; }
+
+  /** Hide the NPC. */
+  hide(): void {
+    this.setVisible(false);
+  }
+
+  /** Show the NPC. Optionally teleport to a new position first. */
+  show(x?: number, y?: number): void {
+    if (x !== undefined) this.x = x;
+    if (y !== undefined) this.y = y;
+    this.setVisible(true);
+  }
 
   setDialogKey(key: string): void {
     this._dialogKey = key;

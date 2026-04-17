@@ -11,6 +11,8 @@ export interface Line {
   portrait?: string;    // texture key for portrait sprite
   text: string;         // dialog text ('{name}' replaced)
   choices?: Choice[];
+  multiSelect?: boolean; // if true, player picks selectCount options before confirming
+  selectCount?: number;  // how many choices the player must pick (default 1)
 }
 
 export type Dialog = Line[];
@@ -75,13 +77,14 @@ export const DIALOGS: Record<string, Dialog> = {
     { speaker: '{name}',
       text: 'Thật ra... không. Đó là lý do cháu đến.' },
     { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
-      text: 'Dệt không khó. Khó là giữ được đường may đều và chắc.' },
+      text: '[gật đầu] Câu đó tốt hơn cái luận văn của cháu đó. Muốn học không? Tay rảnh thì làm cùng bà đi.',
+    },
     { speaker: '{name}',
       text: 'Cháu phải làm thế nào?' },
     { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
-      text: 'Nhìn tay bà. Đều tay, đều sợi. Đừng vội.' },
+      text: 'Dệt không khó. Khó là giữ được đường may đều và chắc.' },
     { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
-      text: '[gật đầu] Câu đó tốt hơn cái luận văn của cháu đó. Muốn học không? Tay rảnh thì làm cùng bà đi.',
+      text: 'Nhìn tay bà. Đều tay, đều sợi. Đừng vội.' ,
       choices: [
         { text: 'May khoảng cách xa, có đoạn lỏng có đoạn chặt',
           trust: 0, score: 0, next: 'scene_1_2_sew_loose', decision: 'sew_loose' },
@@ -94,23 +97,25 @@ export const DIALOGS: Record<string, Dialog> = {
   ],
 
   'scene_1_2_sew_loose' : [
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-kbroi',
+    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
       text: ' (cười nhẹ): Lệch nhịp rồi. Sợi lỏng, sợi chặt.' },
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-kbroi',
+    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
       text: ' Lần đầu ai cũng vậy. Làm lại đi.' },
   ],
   'scene_1_2_sew_medium' : [
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-kbroi',
+    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
       text: ' Nhìn khá ổn đó, nhưng vẫn còn chỗ lệch. Phải chắc tay hơn.' },
   ],
   'scene_1_2_sew_good' : [
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-kbroi',
+    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
       text: ' Được rồi. Nhịp đều, sợi giữ chặt.' },
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-kbroi',
+    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
       text: 'Làm vậy, vải mới bền. Hoa văn mới giữ được lâu.' },
   ],
 
 
+
+  
   // --- 1.3 - Nhà bà YA KBEN 2 ---
   'forest_gathering': [
     { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
@@ -121,20 +126,24 @@ export const DIALOGS: Record<string, Dialog> = {
       text: 'Miễn là để nhuộm vải là được, ta không kén chọn. Tuy nhiên, nhìn kĩ rồi chọn.' },
     { speaker: '{name}',
       text: 'Mình nên hái những cái gì đây?',
+      multiSelect: true,
+      selectCount: 2,
       choices: [
-        { text: 'Củ nghệ và Lá cây giá tỵ',
-          trust: 0, score: 10, next: 'gather_success', decision: 'gather_correct' },
-        { text: 'Củ nghệ và Gõ đỏ',
-          trust: 0, score: 10, next: 'gather_fail', decision: 'gather_wrong_1' },
-        { text: 'Lá cây giá tỵ và Giáng hương',
-          trust: 0, score: 0, next: 'gather_fail', decision: 'gather_wrong_2' },
-        { text: 'Gõ đỏ và Giáng hương',
-          trust: 0, score: 0, next: 'gather_fail', decision: 'gather_wrong_3' },
+        { text: 'Củ nghệ',        score: 1 },
+        { text: 'Lá cây giá tỵ',  score: 1 },
+        { text: 'Gõ đỏ',          score: 0 },
+        { text: 'Giáng hương',    score: 0 },
       ],
     },
   ],
 
   // 1.4 - Ven Rừng ---
+
+  'call_help' :[
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Đi theo tôi, có con hươu bị bẫy' },
+  ],
+
   'scene_1_4': [
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
       text: '[giọng thấp] Bẫy. Không phải người làng đặt. Còn mới.' },
@@ -142,10 +151,6 @@ export const DIALOGS: Record<string, Dialog> = {
       text: 'Mình có gỡ ra được không?' },
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
       text: 'Cẩn thận. Anh giữ thân nó, tôi gỡ dây.',
-      choices: [
-        { text: '[MINI-GAME: Gỡ bẫy cho hươu] - Ấn phím E đúng lúc',
-          trust: 0, score: 15, next: 'scene_1_4_success', decision: 'trap_cleared' },
-      ],
     },
   ],
 
@@ -156,15 +161,33 @@ export const DIALOGS: Record<string, Dialog> = {
       text: 'Nó nhớ mặt người.' },
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
       text: '[nói nhỏ]: Không phải tôi nói. Ông tôi nói.' },
+  ],
+  'after_secure' : [
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
       text: 'Từ đầu mùa khô đến nay tôi thấy 7 cái như thế này' },
     { speaker: '{name}',
       text: 'Anh báo kiểm lâm chưa?' },
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
       text: 'Rồi và không có gì xảy ra.' },
+    { speaker: '{name}',
+      text: '[Im lặng. K\'Brơi nhét bẫy vào gùi. Đi tiếp.' +
+      'Thuận hiểu câu hỏi luận văn của mình về du lịch có trách nhiệm' +
+      'nhỏ hơn thực tế ở đây rất nhiều.]' },
   ],
 
   // 1.5 - Góc rừng yên tĩnh ---
+  'guess_image' : [
+    { speaker: 'Dẫn chuyện', portrait: 'caycamlai',
+      text: 'Con gì dây?',
+      choices: [
+        { text: 'Trâu Rừng',        score: 0 },
+        { text: 'Bò Tót',  score: 15 },
+        { text: 'Heo Rừng Lớn',          score: 0 },
+        { text: 'Gấu Chó',    score: 0 },
+      ],
+    },
+  ],
+
   'scene_1_5': [
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
       text: 'Bò tót xuống gần làng ban ngày, trong rừng đang có tiếng động làm nó sợ. [nhìn về rừng sâu] Cùng hướng với vết máy móc tuần trước.' },
