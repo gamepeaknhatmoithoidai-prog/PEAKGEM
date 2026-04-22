@@ -317,7 +317,7 @@ export class CharacterSelectScene extends Phaser.Scene {
     this.cameras.main.fadeOut(500, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.start('IntroScene');
-      // this.scene.start('Chapter2Scene');
+      // this.scene.start('Chapter1Scene');
       // this.scene.launch('UIScene');
     });
 

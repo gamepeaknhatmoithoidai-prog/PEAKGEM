@@ -22,7 +22,6 @@ export class Chapter1Scene extends Phaser.Scene {
   private npcYakben!: NPC;
   private colliders!: Phaser.Physics.Arcade.StaticGroup;
 
-  private ch2PortalFired = false;
   private inDialog = false;
   private _pendingNPC: NPC | null = null;
   private _lastDialogKey = '';
@@ -35,6 +34,7 @@ export class Chapter1Scene extends Phaser.Scene {
       npc.walkTo(920);
       this.time.delayedCall(5000, () => npc.setDialogKey('plant-intro'));
     },
+
     'plant-intro': (npc) => {
       // K'Brơi walks toward Yakben, then unlocks Yakben's next dialog.
       npc.walkTo(1300, 60, () => {
@@ -78,8 +78,28 @@ export class Chapter1Scene extends Phaser.Scene {
           'người làng — đây là loại người ngoài mang vào, đặt bất hợp pháp trong khu rừng đệm.'
       )
       this.npcKbroi.setDialogKey('after_secure')
-    }
-    
+    },
+
+    'after_secure' :(npc) =>{
+      this.npcKbroi.walkTo(1900 , 60 , () => {
+        this.npcKbroi.setDialogKey('guess_image')
+      })
+    },
+    'guess_image' : (npc) => {
+      this.time.delayedCall(2400 , () => {
+        this.npcKbroi.setDialogKey('scene_1_5')
+      })
+    },
+    'scene_1_5' : (npc) => {
+        this.showConclusion(  
+          '✅ CHƯƠNG 1 HOÀN THÀNH \n\n' +
+          '"Rừng không trả lời người chưa biết lắng nghe."' +
+          'Thuận đã học được cách nghe. Giờ cậu cần học cách hành động.'
+      )
+      this.time.delayedCall(3000, () => {
+        this.goToChapter2()
+      })
+    },
   };
 
   private deerX = 1940; private deerY = 390;
@@ -89,10 +109,6 @@ export class Chapter1Scene extends Phaser.Scene {
   private deerImg!: Phaser.GameObjects.Image;
   private deerProgressBg!: Phaser.GameObjects.Rectangle;
   private deerProgressFill!: Phaser.GameObjects.Rectangle;
-
-  private evidenceZoneActive = false;
-  private evidenceCount = 0;
-  private maxEvidence = 3;
 
   private hintText!: Phaser.GameObjects.Text;
 
@@ -126,7 +142,7 @@ export class Chapter1Scene extends Phaser.Scene {
     this.buildNPCs();
 
     const gender = this.gs.get('gender') || 'male';
-    this.player = new Player(this, 1800, GROUND_Y - 60, gender);
+    this.player = new Player(this, 20, GROUND_Y - 60, gender);
     this.playerBody = this.player.body as Phaser.Physics.Arcade.Body;
     this.playerBody.setCollideWorldBounds(true);
     this.playerBody.setMaxVelocityY(900);
@@ -151,7 +167,7 @@ export class Chapter1Scene extends Phaser.Scene {
     this.events.on('dialog-done', this.onDialogDone, this);
 
     this.time.delayedCall(1200, () => {
-      this.game.events.emit('notify', 'WASD/←→ di chuyển  •  SPACE nhảy  •  E tương tác  •  C chụp ảnh', '#88ff66');
+      this.game.events.emit('notify', 'WASD/←→ di chuyển  •  SPACE nhảy  •  E tương tác', '#88ff66');
     });
 
     this.startAmbient();
@@ -262,13 +278,6 @@ export class Chapter1Scene extends Phaser.Scene {
     const deepG = this.add.graphics().setDepth(DEPTH_BG + 0.8);
     deepG.fillStyle(0x000000, 0.22);
     deepG.fillRect(2100, 0, MAP_W_CH1 - 2100, MAP_H);
-
-    // Chapter-2 portal sign
-    const portal = this.add.text(7900, GROUND_Y - 80, '➜ Khu vực điều tra\n[Nhấn E để tiếp tục]', {
-      fontSize: '13px', fontFamily: 'Arial', color: '#88ccff',
-      backgroundColor: '#00000099', padding: { x: 8, y: 5 },
-    }).setOrigin(0.5).setDepth(DEPTH_UI);
-    this.tweens.add({ targets: portal, alpha: 0.5, duration: 1000, yoyo: true, repeat: -1 });
 
     // Zone labels
     [
@@ -414,22 +423,10 @@ export class Chapter1Scene extends Phaser.Scene {
       if (npc.checkProximity(px, py)) { nearNPC = npc; break; }
     }
 
-    // Evidence zone (Chup Anh)
-    this.evidenceZoneActive = px > 2100 && px < 2800 && this.evidenceCount < this.maxEvidence;
-
-    // Chapter-2 portal
-    const nearPortal = !this.ch2PortalFired && px > 3050 && px < 3210;
-
-    // Inspect object at x=2100
-    const nearGuessImage = Math.abs(px - 2100) < 60;
-
     // Hint
     let hint = '';
     if (nearDeer)                         hint = this.deerRescuing ? '' : '🦌 Giữ E để gỡ bẫy cho hươu';
     else if (nearNPC && !nearNPC.isDone)  hint = `💬 E — Nói chuyện với ${nearNPC.npcName}`;
-    else if (nearGuessImage)              hint = '🔍 E — Quan sát';
-    else if (this.evidenceZoneActive)     hint = `📷 C — Chụp bằng chứng (${this.evidenceCount}/${this.maxEvidence})`;
-    else if (nearPortal)                  hint = '➜ E — Tiếp tục sang Khu điều tra';
 
     if (hint) {
       this.hintText.setText(hint).setVisible(true);
@@ -444,16 +441,6 @@ export class Chapter1Scene extends Phaser.Scene {
     // E key actions
     if (this.player.isInteractJustPressed()) {
       if (nearNPC && !nearNPC.isDone) { this.startDialog(nearNPC.dialogKey, nearNPC); return; }
-      if (nearGuessImage) { 
-        this.startDialog('guess_image', null)
-        this.npcKbroi.setDialogKey('scene_1_5') 
-        return; }
-      if (nearPortal) { this.ch2PortalFired = true; this.goToChapter2(); return; }
-    }
-
-    // C key: photo
-    if (this.player.isCameraJustPressed() && this.evidenceZoneActive) {
-      this.collectEvidence(px, py);
     }
 
     // Deer rescue hold
@@ -554,35 +541,6 @@ export class Chapter1Scene extends Phaser.Scene {
     });
     
 
-  }
-
-  private collectEvidence(px: number, _py: number): void {
-    const evidenceXs = [2250, 2450, 2650];
-    const nearest = evidenceXs.find(ex => Math.abs(ex - px) < 80);
-    if (nearest === undefined) {
-      this.game.events.emit('notify', 'Di gần đến dấu vết hơn để chụp ảnh', '#ffcc44');
-      return;
-    }
-
-    this.evidenceCount++;
-    this.gs.set('evidenceCount', this.evidenceCount);
-    this.gs.addScore(150);
-    this.gs.addInventory(`evidence-ch1-${this.evidenceCount}`);
-
-    const flash = this.add.rectangle(nearest, GROUND_Y - 60, 80, 120, 0xffffff, 0.6)
-      .setDepth(DEPTH_UI + 3);
-    this.tweens.add({ targets: flash, alpha: 0, duration: 400, onComplete: () => flash.destroy() });
-
-    this.game.events.emit('notify', `📷 Bằng chứng ${this.evidenceCount}/${this.maxEvidence} — +150 điểm`, '#f5c518');
-    this.playSfx('camera', 0.5);   // shutter click on photo
-    this.time.delayedCall(200, () => this.playSfx('collect', 0.35)); // evidence item added
-
-    if (this.evidenceCount >= this.maxEvidence) {
-      this.time.delayedCall(800, () => {
-        this.game.events.emit('notify', '✅ Đủ bằng chứng! Tiếp tục về phía khu điều tra.', '#88ff66');
-        this.playSfx('success', 0.5); // all evidence collected — mission step done
-      });
-    }
   }
 
   // ═══════════════════════════════════════════════════════════════════

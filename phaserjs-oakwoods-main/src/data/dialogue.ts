@@ -177,8 +177,10 @@ export const DIALOGS: Record<string, Dialog> = {
 
   // 1.5 - Góc rừng yên tĩnh ---
   'guess_image' : [
-    { speaker: 'Dẫn chuyện', portrait: 'caycamlai',
-      text: 'Con gì dây?',
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: '[chỉ về phía bụi cây xa] Có gì đó đằng kia từ sáng. Anh chụp ảnh được không?' },
+    { speaker: 'Dẫn chuyện', portrait: 'bo-tot',
+      text: '',
       choices: [
         { text: 'Trâu Rừng',        score: 0 },
         { text: 'Bò Tót',  score: 15 },
@@ -194,36 +196,34 @@ export const DIALOGS: Record<string, Dialog> = {
     { speaker: '{name}',
       text: ' Anh đang nói có người đang làm gì đó trong rừng?' },
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: '[không trả lời] Anh chụp được ảnh bò tót là tốt. Lưu lại đi.' },
-  ],
-
-  // 1.6 - Nhà bà Ya K'Ben ---
-  'scene_1_6': [
+      text: 'Hai tuần trước. Tôi đi kiểm tra một mình. Không chỉ một vết. Cả một đường — từ phía suối vào đến gần vùng sinh sản bò tót' },
     { speaker: '{name}',
-      text: 'Cái vết sơn đỏ trên cây — anh biết từ bao giờ?' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Hai tuần trước. Tôi đi kiểm tra một mình.' },
+      text: 'Trời. Anh báo ai chưa? K\'Brơi: Kiểm lâm Hùng. Quen nhà này từ hồi tôi còn nhỏ. Ông ấy bảo để xem. ' },
     { speaker: '{name}',
-      text: 'Anh đã báo ai chưa?' },
+      text: '[ngừng, giọng phẳng hơn] Hai tuần. Không có gì' },
+    { speaker: '{name}',
+      text: 'Anh nghĩ ông ấy...? ' },
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Kiểm lâm Hùng. Quen nhà này từ hồi tôi còn nhỏ. Ông ấy bảo để xem. Hai tuần. Không có gì. [ngừng] Tôi không biết ông ấy không làm được — hay không muốn làm.' },
+      text: 'Tôi không biết ông ấy không làm được — hay không muốn làm. [im lặng ngắn] Nhưng hôm nay con bò tót xuống bìa rừng ban ngày. Nghĩa là tiếng động đó không dừng lại. Nghĩa là hai tuần không đủ nữa.' },
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: '[lần đầu tiên nhìn thẳng, không dò xét] Tôi cần ai đó không thuộc nơi này giữ bằng chứng. Người trong làng có thể bị ép. Anh thì không. [ngừng] Anh ở lại thêm được không?',
-      choices: [
-        { text: '"Tôi ở lại. Và tôi muốn hiểu hết chuyện đang xảy ra."',
-          trust: 10, score: 25, next: 'choice_1_6_A', decision: 'stay_resolve' },
-        { text: '"Tôi cần nghĩ thêm. Đây không phải việc của luận văn nữa rồi."',
-          trust: 5, score: 10, next: 'choice_1_6_B', decision: 'stay_hesitant' },
+      text: 'Tôi cần ai đó không thuộc nơi này giữ bằng chứng. Người trong làng có thể bị ép. Anh thì không.' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Anh ở lại thêm được không?' },
+    { speaker: '{name}',
+      text: '',
+      choices : [
+        { text: 'Tôi ở lại. Và tôi muốn hiểu hết chuyện đang xảy ra.',       next : 'option A', score: 25 },
+        { text: 'Tôi cần nghĩ thêm. Đây không phải việc của luận văn nữa rồi', next : 'option B', score: 10 },
       ],
     },
   ],
 
-  'choice_1_6_A': [
+  'option A': [
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
       text: 'Ngủ sớm đi. Sáng mai 5h mình đi.' },
   ],
 
-  'choice_1_6_B': [
+  'option B': [
     { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
       text: 'Đúng. Nếu anh không chắc — đừng ở lại. Nửa vời còn tệ hơn không làm.' },
     { speaker: 'Dẫn chuyện',

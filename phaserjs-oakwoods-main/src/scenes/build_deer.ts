@@ -12,8 +12,8 @@ export function buildDeer(scene: Phaser.Scene, deerX: number, deerY: number): De
     scene.add.image(deerX, deerY + 18, 'trap').setScale(1.6).setDepth(DEPTH_WORLD);
 
   const deerImg = scene.textures.exists('deer')
-    ? scene.add.image(deerX, deerY, 'deer').setScale(1.4).setDepth(DEPTH_WORLD + 1)
-    : scene.add.image(deerX, deerY, '__DEFAULT').setDisplaySize(32, 32).setVisible(false);
+    ? scene.add.image(deerX, deerY, 'deer').setScale(0.15).setDepth(DEPTH_WORLD + 1)
+    : scene.add.image(deerX, deerY, '__DEFAULT').setDisplaySize(4, 4).setVisible(false);
 
   const deerProgressBg = scene.add.rectangle(deerX, deerY - 40, 80, 10, 0x223311)
     .setStrokeStyle(1, 0x44aa22).setDepth(DEPTH_UI).setVisible(false);
