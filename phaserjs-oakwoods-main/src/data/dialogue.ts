@@ -488,6 +488,143 @@ export const DIALOGS: Record<string, Dialog> = {
       text: '[Nhìn thẳng] Tôi biết đủ rồi.' },
   ],
 
+  // ══════════════════════════════════════════════════════════════════════
+  //  CHƯƠNG 2 — PHẦN 2 (CẢNH 5 → 11)
+  // ══════════════════════════════════════════════════════════════════════
+
+  // ── CẢNH 5: HIÊN NHÀ AMA K'NƠI — buổi sáng ──────────────────────────
+  'c2s5-intro': [
+    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+      text: 'Ngồi xuống đã. Rừng sáng nay kể gì với hai đứa bây?' },
+  ],
+
+  'c2s5-post-tea': [
+    { speaker: '{name}',
+      text: 'Ama... chúng con thấy dấu khảo sát, cọc đo đạc, cây bị đánh dấu hàng loạt. Video phá rừng ở Tà Lài. Con nghĩ đây là chuẩn bị cho dự án thủy điện.' },
+    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+      text: 'K\'Brơi. Mày biết rồi phải không? Biết từ trước khi nó đến đây.' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Con biết từ tháng trước.' },
+    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+      text: 'Sao không nói?' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Vì người làm chuyện này... con quen.' },
+  ],
+
+  // ── CẢNH 6: PHƠI BÀY — SỰ THẬT VỀ HÙNG ─────────────────────────────
+  'c2s6-pre-flashlight': [
+    { speaker: 'Dẫn chuyện',
+      text: 'K\'Brơi kể lại... Một tháng trước, trong rừng đêm...' },
+  ],
+
+  'c2s6-post-flashlight': [
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Người làm sai lệch báo cáo hiện trạng rừng cho đội của ông Thắng... là anh Hùng.' },
+    { speaker: '{name}',
+      text: 'Hùng — kiểm lâm viên Hùng? Người hay ghé qua nhà ông không?' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Đúng. Anh ấy quen gia đình con từ nhỏ. Cha con và anh Hùng từng học chung.' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Anh Hùng có con nhỏ. Vợ bệnh. Ông Thắng trả tiền nhiều. Con không biết phải làm gì.' },
+    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+      text: 'Rừng không phán xét con người. Rừng chỉ ghi nhớ. Ghi nhớ tất cả.' },
+  ],
+
+  // ── CẢNH 7: ÔNG THẮNG XUẤT HIỆN ─────────────────────────────────────
+  'c2s7-thang': [
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+      text: 'Cậu là Thuận? Sinh viên? Nghe thú vị lắm.' },
+    { speaker: '{name}',
+      text: 'Vâng. Ông là...?' },
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+      text: 'Nguyễn Văn Thắng. Giám đốc điều hành phân khu. Tôi nghe cậu đang tìm hiểu tiềm năng phát triển khu vực này — trùng hợp, tôi cũng vậy.' },
+    { speaker: '{name}',
+      text: 'Ông... phát triển theo hướng nào ạ?' },
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+      text: 'Thủy điện. Cung cấp điện và việc làm cho hàng chục nghìn hộ dân. Đây là bước tiến văn minh mà khu vực này đang cần.' },
+    { speaker: '{name}',
+      text: 'Còn rừng? Còn người Mạ đang sống ở đây?' },
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+      text: 'Cậu trẻ thật. Tiến bộ và bảo tồn không phải lúc nào cũng chống nhau, cậu ạ. Tái định cư có hỗ trợ. Rừng phòng hộ vẫn giữ. Còn những khu bị tác động — đó là cái giá của văn minh.' },
+    { speaker: 'Dẫn chuyện',
+      text: 'Thuận nhìn ông Thắng. Không thấy ánh mắt kẻ xấu. Chỉ thấy ánh mắt người hoàn toàn tin vào điều mình nói.' },
+  ],
+
+  // ── CẢNH 8: BỊ MUA CHUỘC ────────────────────────────────────────────
+  'c2s8-bribe': [
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+      text: 'Thuận. Tôi biết cậu chụp ảnh trong rừng hôm qua. Và tôi biết cậu đang làm luận văn.' },
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+      text: 'Nghe này — cậu muốn nghiên cứu phát triển bền vững? Tôi tài trợ luận văn. Kinh phí đủ để cậu có chuyến thực địa quốc tế.' },
+    { speaker: '{name}',
+      text: 'Đổi lại là...?' },
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+      text: 'Đổi lại là cậu không lan truyền thông tin chưa kiểm chứng. Gây hoang mang dư luận là tội nặng. Cậu còn trẻ — đừng để một quyết định dại dột phá nát tương lai.',
+      choices: [
+        { text: 'Được thôi, tôi đồng ý.',
+          score: 10, decision: 'bribe_accept' },
+        { text: 'Ông nhầm người rồi.',
+          score: 20, decision: 'bribe_refuse' },
+        { text: 'Nếu dự án hợp lệ — ông sợ gì ở thông tin đó?',
+          score: 12, decision: 'bribe_question' },
+      ],
+    },
+  ],
+
+  // ── CẢNH 9: LAN XUẤT HIỆN ────────────────────────────────────────────
+  'c2s9-lan': [
+    { speaker: 'Lan', portrait: 'npc-lan',
+      text: 'Tôi là Lan. Kiểm lâm viên. Tôi biết Thuận và K\'Brơi đã làm gì hai ngày qua. Tôi muốn giúp — nhưng chúng ta cần hệ thống hóa lại.' },
+    { speaker: '{name}',
+      text: 'Chị Lan biết về dự án này từ trước à?' },
+    { speaker: 'Lan', portrait: 'npc-lan',
+      text: 'Biết. Nhưng tôi thiếu bằng chứng thực địa — đúng cái anh đang có. Còn anh thiếu dữ liệu khoa học — đúng cái tôi có. Mình cần nhau.' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Tôi tin chị Lan.' },
+    { speaker: 'Dẫn chuyện',
+      text: 'Lan trao cho Thuận một USB và bản báo cáo khoa học. Rồi biến mất — đi làm phần của mình.' },
+  ],
+
+  // Biến thể khi Thuận đã chọn đồng ý với Thắng (choice A)
+  'c2s9-lan-warned': [
+    { speaker: 'Lan', portrait: 'npc-lan',
+      text: 'Tôi là Lan. Kiểm lâm viên. Tôi biết Thuận và K\'Brơi đã làm gì hai ngày qua. Tôi muốn giúp — nhưng chúng ta cần hệ thống hóa lại.' },
+    { speaker: '{name}',
+      text: 'Chị Lan biết về dự án này từ trước à?' },
+    { speaker: 'Lan', portrait: 'npc-lan',
+      text: 'Biết. Nhưng tôi thiếu bằng chứng thực địa — đúng cái anh đang có. Còn anh thiếu dữ liệu khoa học — đúng cái tôi có. Mình cần nhau.' },
+    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+      text: 'Tôi tin chị Lan.' },
+    { speaker: 'Lan', portrait: 'npc-lan',
+      text: 'À — và nếu anh đã nói gì với ông Thắng tối qua... tôi không cần biết. Nhưng từ giờ hãy cẩn thận hơn.' },
+    { speaker: 'Dẫn chuyện',
+      text: 'Lan trao cho Thuận một USB và bản báo cáo khoa học. Rồi biến mất — đi làm phần của mình.' },
+  ],
+
+  // ── CẢNH 10: HÙNG THÚ NHẬN ───────────────────────────────────────────
+  'c2s10-hung': [
+    { speaker: 'Hùng', portrait: 'npc-hung',
+      text: 'Thuận... tôi biết cậu biết rồi. K\'Brơi đã nói đúng không.' },
+    { speaker: '{name}',
+      text: '...' },
+    { speaker: 'Hùng', portrait: 'npc-hung',
+      text: 'Tôi không muốn làm chuyện này. Nhưng vợ tôi bệnh nặng. Tiền chữa trị tôi không có. Ông Thắng đưa ra số tiền đủ để lo cho cô ấy hai năm. Tôi không đủ mạnh để từ chối.' },
+    { speaker: 'Hùng', portrait: 'npc-hung',
+      text: 'Tôi không thể đứng trước K\'Brơi được. Tôi biết cha nó — anh ấy là người tốt. Nhưng tôi không thể để vợ tôi... Thuận, tôi không biết làm gì nữa.' },
+  ],
+
+  // ── CẢNH 11: TIỄN BIỆt / LỜI CHÀO AMA ──────────────────────────────
+  'c2s11-farewell': [
+    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+      text: 'Con à. Ông hỏi một câu thôi. Con về thành phố — con mang theo gì?' },
+    { speaker: '{name}',
+      text: 'Con... con mang theo sự thật, Ama.' },
+    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+      text: 'Thì mang cho đúng chỗ.' },
+    { speaker: 'Dẫn chuyện',
+      text: 'K\'Brơi đứng sau Ama K\'Nơi. Không nói gì. Chỉ nhìn Thuận — lần đầu tiên ánh mắt không còn cảnh giác.' },
+  ],
+
   // ── KẾT THÚC / ENDINGS ───────────────────────────────────────────────
   'ending-good': [
     { speaker: 'Lan', portrait: 'npc-lan',
