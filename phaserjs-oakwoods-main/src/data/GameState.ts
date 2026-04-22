@@ -12,10 +12,18 @@ export interface State {
   animalSaved: boolean;
   evidenceCount: number;  // 0–5 (Ch2)
   ch1Done: boolean;
-  // Chapter 2 scene progression: 0=Scene1, 1=Scene2, 2=Scene3, 3=Scene4, 4=done
+  // Chapter 2 scene progression: 0=Scene1 … 11=Scene11, 12=done
   c2Progress: number;
   runnerHits: number;     // hits recorded in Scene 2 runner
   photosTaken: number;    // photos taken in Scene 3
+  // Chapter 2 Part 2 (Scenes 5–11)
+  scene8Choice: string;   // 'A' | 'B' | 'C'
+  finalChoice: string;    // 'red' | 'black' | 'yellow'
+  teaScore: number;       // MiniGameTea — 0–15
+  flashlightScore: number;// MiniGameFlashlight — 0–50
+  crocodileScore: number; // MiniGameCrocodile — 15 or 30
+  firefliesCount: number; // MiniGameFirefly — 0–10+
+  dossierScore: number;   // MiniGameDossier — 0–45
 }
 
 const DEFAULTS: State = {
@@ -33,6 +41,13 @@ const DEFAULTS: State = {
   c2Progress: 0,
   runnerHits: 0,
   photosTaken: 0,
+  scene8Choice: '',
+  finalChoice: '',
+  teaScore: 0,
+  flashlightScore: 0,
+  crocodileScore: 0,
+  firefliesCount: 0,
+  dossierScore: 0,
 };
 
 /** Thin wrapper around Phaser's registry for type-safe access. */

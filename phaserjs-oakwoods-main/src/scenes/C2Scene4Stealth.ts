@@ -373,12 +373,12 @@ export class C2Scene4Stealth extends Phaser.Scene {
   private goToEnding(): void {
     if (this.transitionStarted) return;
     this.transitionStarted = true;
-    this.gs.set('c2Progress', 4);
+    this.gs.set('c2Progress', 4);   // router will start C2S5Scene
     try { this.sound.stopAll(); } catch (_) {}
     this.cameras.main.fadeOut(800, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
-      this.scene.stop('UIScene');
-      this.scene.start('EndingScene');
+      // UIScene stays running — Chapter 2 continues through Scenes 5–11
+      this.scene.start('Chapter2Scene');
     });
   }
 
