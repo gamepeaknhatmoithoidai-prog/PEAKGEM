@@ -22,14 +22,15 @@ interface ClueData {
   label:      string;
   vname:      string;
   x:          number;
+  y:          number;
   scale:      number;
 }
 
 const CLUE_DEFS: ClueData[] = [
-  { id: 'tape',   textureKey: 'stuff-tape',   label: 'Thước dây',    vname: 'Thước dây đo đất',       x:  450, scale: 0.20 },
-  { id: 'gps',    textureKey: 'stuff-gps',    label: 'Thiết bị GPS', vname: 'Thiết bị định vị GPS',    x:  920, scale: 0.20 },
-  { id: 'tree',   textureKey: 'stuff-tree',   label: 'Cây đánh dấu', vname: 'Cây rừng có ký hiệu đỏ',  x: 1420, scale: 0.20 },
-  { id: 'gloves', textureKey: 'stuff-gloves', label: 'Găng tay',     vname: 'Găng tay bỏ lại',         x: 1960, scale: 0.20 },
+  { id: 'tape',   textureKey: 'stuff-tape',   label: 'Thước dây',    vname: 'Thước dây đo đất',       x:  450 , y : -5 , scale: 0.05 },
+  { id: 'gps',    textureKey: 'stuff-gps',    label: 'Thiết bị GPS', vname: 'Thiết bị định vị GPS',    x:  920 , y : 0 , scale: 0.05 },
+  { id: 'tree',   textureKey: 'stuff-tree',   label: 'Cây đánh dấu', vname: 'Cây rừng có ký hiệu đỏ',  x: 1420,  y : 0 , scale: 0.1 },
+  { id: 'gloves', textureKey: 'stuff-gloves', label: 'Găng tay',     vname: 'Găng tay bỏ lại',         x: 1960 , y : 0 , scale: 0.05 },
 ];
 
 interface ClueInstance extends ClueData {
@@ -159,8 +160,10 @@ export class C2Scene1Investigation extends Phaser.Scene {
     for (let i = 0; i < CLUE_DEFS.length; i++) {
       const d = CLUE_DEFS[i];
 
-      // ── Physics sprite: bottom of image sits on GROUND_Y ──
-      const spr = this.clueGroup.create(d.x, GROUND_Y, d.textureKey) as Phaser.Physics.Arcade.Image;
+      const clueY = GROUND_Y - d.y;
+
+      // ── Physics sprite: bottom of image sits on clue-specific height ──
+      const spr = this.clueGroup.create(d.x, clueY, d.textureKey) as Phaser.Physics.Arcade.Image;
       spr.setScale(d.scale).setOrigin(0.5, 1).setDepth(DEPTH_WORLD + 1);
       spr.refreshBody();   // recompute body for new scale + origin
       try { spr.setPostPipeline('WhiteKey'); } catch (_) {}
@@ -168,18 +171,18 @@ export class C2Scene1Investigation extends Phaser.Scene {
       // ── Ground shadow (flat ellipse under the item) ──
       const ringGfx = this.add.graphics().setDepth(DEPTH_WORLD + 0.5);
       ringGfx.fillStyle(0x000000, 0.22);
-      ringGfx.fillEllipse(d.x, GROUND_Y - 4, 52, 14);
+      ringGfx.fillEllipse(d.x, clueY - 4, 52, 14);
       ringGfx.lineStyle(2, 0xffcc44, 0.75);
-      ringGfx.strokeEllipse(d.x, GROUND_Y - 4, 54, 16);
+      ringGfx.strokeEllipse(d.x, clueY - 4, 54, 16);
       this.tweens.add({ targets: ringGfx, alpha: 0.25, duration: 900, yoyo: true, repeat: -1 });
 
       // ── Floating label above item ──
-      const labelGfx = this.add.text(d.x, GROUND_Y - 78, d.label, {
+      const labelGfx = this.add.text(d.x, clueY - 78, d.label, {
         fontSize: '10px', fontFamily: 'Arial', fontStyle: 'bold',
         color: '#ffcc44', stroke: '#000', strokeThickness: 2,
         backgroundColor: '#00000099', padding: { x: 4, y: 2 },
       }).setOrigin(0.5).setDepth(DEPTH_WORLD + 2);
-      this.tweens.add({ targets: labelGfx, y: GROUND_Y - 84, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+      this.tweens.add({ targets: labelGfx, y: clueY - 84, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
       this.clues.push({ ...d, collected: false, sprite: spr, ringGfx, labelGfx, checkText: null });
     }
@@ -291,7 +294,7 @@ export class C2Scene1Investigation extends Phaser.Scene {
     let nearClue: ClueInstance | null = null;
     if (!allDone) {
       for (const c of this.clues) {
-        if (!c.collected && Phaser.Math.Distance.Between(px, py, c.x, GROUND_Y) < 80) {
+        if (!c.collected && Phaser.Math.Distance.Between(px, py, c.x, GROUND_Y - c.y) < 80) {
           nearClue = c;
           break;
         }
@@ -355,7 +358,7 @@ export class C2Scene1Investigation extends Phaser.Scene {
     if (clue.labelGfx) { this.tweens.killTweensOf(clue.labelGfx); clue.labelGfx.destroy(); clue.labelGfx = null; }
 
     // Collect flash
-    const flash = this.add.rectangle(clue.x, GROUND_Y - 24, 64, 48, 0xffffff, 0.75).setDepth(20);
+    const flash = this.add.rectangle(clue.x, GROUND_Y - clue.y - 24, 64, 48, 0xffffff, 0.75).setDepth(20);
     this.tweens.add({ targets: flash, alpha: 0, duration: 300, onComplete: () => flash.destroy() });
 
     // Update checklist
