@@ -38,11 +38,11 @@ interface PhotoTargetDef {
 }
 
 const TARGETS: PhotoTargetDef[] = [
-  { id: 'oil',    textureKey: 'stuff-oil',    label: 'Vết dầu tràn',          x:  420, scale: 0.20 },
-  { id: 'tracks', textureKey: 'stuff-tracks', label: 'Dấu bánh xe cơ giới',   x:  900, scale: 0.20 },
-  { id: 'map',    textureKey: 'stuff-map',    label: 'Bản đồ in bị rơi',      x: 1420, scale: 0.20 },
-  { id: 'idcard', textureKey: 'stuff-idcard', label: 'Thẻ công nhân bị rơi',  x: 1960, scale: 0.20 },
-  { id: 'saw',    textureKey: 'stuff-saw',    label: 'Lưỡi cưa bị vứt lại',   x: 2480, scale: 0.20 },
+  { id: 'oil',    textureKey: 'stuff-oil',    label: 'Vết dầu tràn',          x:  420, scale: 0.05 },
+  { id: 'tracks', textureKey: 'stuff-tracks', label: 'Dấu bánh xe cơ giới',   x:  900, scale: 0.05 },
+  { id: 'map',    textureKey: 'stuff-map',    label: 'Bản đồ in bị rơi',      x: 1420, scale: 0.03 },
+  { id: 'idcard', textureKey: 'stuff-idcard', label: 'Thẻ công nhân bị rơi',  x: 1960, scale: 0.03 },
+  { id: 'saw',    textureKey: 'stuff-saw',    label: 'Lưỡi cưa bị vứt lại',   x: 2480, scale: 0.03 },
 ];
 
 interface PhotoInstance extends PhotoTargetDef {

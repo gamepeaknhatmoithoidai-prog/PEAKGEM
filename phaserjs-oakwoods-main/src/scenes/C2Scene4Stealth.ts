@@ -20,7 +20,7 @@ const FLOOR_H  = 120;
 const MAP_W    = 3200;
 
 // ── Stealth walk speed cap ────────────────────────────────────────────────────
-const STEALTH_MAX_VX = 80;   // px/s — enforced after player.update()
+const STEALTH_MAX_VX = 90;   // px/s — enforced after player.update()
 
 // ── NPC positions ─────────────────────────────────────────────────────────────
 const NPC_DEFS = [
