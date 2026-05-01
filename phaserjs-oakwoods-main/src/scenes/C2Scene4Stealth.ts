@@ -12,7 +12,7 @@ import Phaser from 'phaser';
 import { GS } from '../data/GameState';
 import { Player } from '../entities/Player';
 import { NPC } from '../entities/NPC';
-import { W, H, DEPTH_BG, DEPTH_WORLD, DEPTH_UI } from '../constants';
+import { W, H, DEPTH_BG, DEPTH_WORLD, DEPTH_UI, PLAYER_SPEED } from '../constants';
 
 // ── Layout ────────────────────────────────────────────────────────────────────
 const GROUND_Y = 420;
@@ -20,7 +20,7 @@ const FLOOR_H  = 120;
 const MAP_W    = 3200;
 
 // ── Stealth walk speed cap ────────────────────────────────────────────────────
-const STEALTH_MAX_VX = 90;   // px/s — enforced after player.update()
+const STEALTH_MAX_VX = PLAYER_SPEED;   // match Chapter 1 speed
 
 // ── NPC positions ─────────────────────────────────────────────────────────────
 const NPC_DEFS = [
@@ -111,14 +111,15 @@ export class C2Scene4Stealth extends Phaser.Scene {
       this.add.tileSprite(MAP_W / 2, H / 2, MAP_W, H, 'bg-ch2')
         .setDepth(DEPTH_BG).setTileScale(s, s);
     } else {
+      // Solid dark fallback — no shapes, just sky + ground bands
       const bg = this.add.graphics().setDepth(DEPTH_BG);
       bg.fillStyle(0x010204); bg.fillRect(0, 0, MAP_W, H);
       bg.fillStyle(0x080f03); bg.fillRect(0, GROUND_Y - 20, MAP_W, H);
-      bg.fillStyle(0x040a02);
+      // Trunk-only tree silhouettes (no circles)
+      bg.fillStyle(0x050e03);
       for (let x = 0; x < MAP_W; x += 80) {
-        const ch = 120 + (x % 80);
-        bg.fillCircle(x + 40, GROUND_Y - ch, 36 + (x % 24));
-        bg.fillRect(x + 34, GROUND_Y - 55, 12, 55);
+        const th = 120 + (x % 80);
+        bg.fillRect(x + 34, GROUND_Y - th, 12, th);
       }
     }
     // Night overlay

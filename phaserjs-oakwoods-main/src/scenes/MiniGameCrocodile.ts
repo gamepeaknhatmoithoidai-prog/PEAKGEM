@@ -28,12 +28,23 @@ const CROC_Y       = WATER_TOP + CROC_H / 2;
 const PLAYER_W     = 22;
 const PLAYER_H     = 36;
 
+// ── Mid-air platform constants ────────────────────────────────────────────────
+const PLAT_Y       = WATER_TOP - 70;   // platform surface y (above water)
+const PLAT_W       = 80;               // platform width
+const PLAT_H       = 18;               // platform thickness
+
+// Alternating layout: plat → croc → plat → croc → plat → croc → right bank
+const PLAT_STARTS  = [210, 430, 640] as const;
+const CROC_STARTS  = [320, 535, 750] as const;
+const CROC_SPEEDS  = [75, -90, 65]   as const;
+
 export class MiniGameCrocodile extends Phaser.Scene {
   private gs!: GS;
   private player!: Phaser.Physics.Arcade.Image;
   private playerBody!: Phaser.Physics.Arcade.Body;
   private crocs!: Phaser.Physics.Arcade.Group;
   private banks!: Phaser.Physics.Arcade.StaticGroup;
+  private platforms!: Phaser.Physics.Arcade.StaticGroup;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keyLeft!:  Phaser.Input.Keyboard.Key;
   private keyRight!: Phaser.Input.Keyboard.Key;
@@ -68,6 +79,7 @@ export class MiniGameCrocodile extends Phaser.Scene {
 
     this.buildBackground();
     this.buildBanks();
+    this.buildPlatforms();
     this.buildCrocs();
     this.buildPlayer();
     this.buildUI();
@@ -155,55 +167,67 @@ export class MiniGameCrocodile extends Phaser.Scene {
   private buildCrocs(): void {
     this.crocs = this.physics.add.group();
 
-    const speeds = [75, -95, 65, -85];
-    const startX = [210, 370, 530, 670];
-
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < CROC_STARTS.length; i++) {
       const useSprite = this.textures.exists('crocodile-sprite');
       const croc = this.crocs.create(
-        startX[i], CROC_Y,
+        CROC_STARTS[i], CROC_Y,
         useSprite ? 'crocodile-sprite' : '__DEFAULT',
       ) as Phaser.Physics.Arcade.Image;
 
       if (useSprite) {
-        // Display taller than hitbox so the croc body shows in the water
         croc.setDisplaySize(CROC_W, CROC_H * 3).setDepth(DEPTH_WORLD + 0.5);
       } else {
         croc.setDisplaySize(CROC_W, CROC_H).setDepth(DEPTH_WORLD + 0.5);
         const g = this.add.graphics().setDepth(DEPTH_WORLD + 0.4);
         (croc as any)._gfx = g;
-        this.drawCrocGfx(g, startX[i], CROC_Y);
+        this.drawCrocGfx(g, CROC_STARTS[i], CROC_Y);
       }
 
       const body = croc.body as Phaser.Physics.Arcade.Body;
       body.setImmovable(true);
       body.allowGravity = false;
-      body.setVelocityX(speeds[i]);
+      body.setVelocityX(CROC_SPEEDS[i]);
       body.setCollideWorldBounds(false);
 
-      // Flat thin hitbox at the TOP of the sprite (the croc's back)
-      // setSize with center=false, then manually offset to top
       body.setSize(CROC_W, CROC_H, false);
-      body.setOffset(0, 0);  // body top = sprite top = CROC_Y - displayH/2
-      // Adjust so body top aligns with WATER_TOP regardless of display height:
-      // sprite top = CROC_Y - displayH/2; we want body top = WATER_TOP
-      // offset.y = WATER_TOP - (CROC_Y - displayH/2)
       const dispH = useSprite ? CROC_H * 3 : CROC_H;
       const spriteTop = CROC_Y - dispH / 2;
       body.setOffset(0, WATER_TOP - spriteTop);
     }
   }
 
+  // Rect-only croc fallback — no circles or ellipses
   private drawCrocGfx(g: Phaser.GameObjects.Graphics, cx: number, cy: number): void {
     g.clear();
-    const top = WATER_TOP;
+    const top = WATER_TOP - 2;
     g.fillStyle(0x2a7a2a);
-    g.fillRoundedRect(cx - CROC_W / 2, top - 2, CROC_W, CROC_H + 4, 6);
+    g.fillRect(cx - CROC_W / 2, top, CROC_W, CROC_H + 4);
     g.fillStyle(0x1a5a1a);
-    g.fillEllipse(cx + CROC_W / 2 - 12, top + 2, 20, 12);  // head
+    g.fillRect(cx + CROC_W / 2 - 22, top, 22, CROC_H + 4);  // head
     g.fillStyle(0xffcc00);
-    g.fillEllipse(cx + CROC_W / 2 - 16, top + 2, 6, 6);    // eye
+    g.fillRect(cx + CROC_W / 2 - 20, top + 4, 5, 5);         // eye
     void cy;
+  }
+
+  // ── Mid-air platforms ─────────────────────────────────────────────────────────
+  private buildPlatforms(): void {
+    this.platforms = this.physics.add.staticGroup();
+
+    for (const px of PLAT_STARTS) {
+      const plat = this.platforms.create(px, PLAT_Y, '__DEFAULT') as Phaser.Physics.Arcade.Image;
+      plat.setDisplaySize(PLAT_W, PLAT_H).setVisible(false).refreshBody();
+
+      // Wood-plank visual — rectangles only, pixel art style
+      const g = this.add.graphics().setDepth(DEPTH_WORLD + 0.45);
+      g.fillStyle(0x6b3a1a);
+      g.fillRect(px - PLAT_W / 2, PLAT_Y - PLAT_H / 2, PLAT_W, PLAT_H);
+      g.fillStyle(0x9a5a30);
+      g.fillRect(px - PLAT_W / 2 + 2, PLAT_Y - PLAT_H / 2 + 2, PLAT_W - 4, 4);
+      g.fillRect(px - PLAT_W / 2 + 2, PLAT_Y + PLAT_H / 2 - 6, PLAT_W - 4, 4);
+      g.fillStyle(0x4a2510);
+      g.fillRect(px - PLAT_W / 2, PLAT_Y - PLAT_H / 2, PLAT_W, 2);
+      g.fillRect(px - PLAT_W / 2, PLAT_Y + PLAT_H / 2 - 2, PLAT_W, 2);
+    }
   }
 
   // ── Player ───────────────────────────────────────────────────────────────────
@@ -247,10 +271,19 @@ export class MiniGameCrocodile extends Phaser.Scene {
         this.lastSafeX = this.player.x;
         this.lastSafeY = this.player.y;
       },
-      (_p, _c) => {
-        // Only resolve collision when player is falling or stationary (not jumping upward)
-        return this.playerBody.velocity.y >= -30;
+      (_p, _c) => this.playerBody.velocity.y >= -30,
+      this,
+    );
+
+    // Platform collider — one-way (land from above only), updates safe position
+    this.physics.add.collider(
+      this.player,
+      this.platforms,
+      () => {
+        this.lastSafeX = this.player.x;
+        this.lastSafeY = this.player.y;
       },
+      (_p, _plat) => this.playerBody.velocity.y >= -30,
       this,
     );
   }
@@ -285,7 +318,7 @@ export class MiniGameCrocodile extends Phaser.Scene {
   // ── Jump ─────────────────────────────────────────────────────────────────────
   private doJump(): void {
     if (this.done) return;
-    if (this.playerBody.blocked.down) {
+    if (this.playerBody.blocked.down || this.playerBody.touching.down) {
       this.playerBody.setVelocityY(JUMP_VY);
     }
   }
@@ -343,20 +376,21 @@ export class MiniGameCrocodile extends Phaser.Scene {
       if (g) this.drawCrocGfx(g, croc.x, croc.y);
     }
 
-    // ── Fallback player graphic ──────────────────────────────────────────────
+    // ── Fallback player graphic (rect-only, no ellipses) ────────────────────
     const pg = (this.player as any)._gfx as Phaser.GameObjects.Graphics | undefined;
     if (pg) {
       pg.clear();
       pg.fillStyle(0x4488ff);
-      pg.fillRect(this.player.x - 8, this.player.y - 14, 16, 28);
-      pg.fillEllipse(this.player.x, this.player.y - 22, 18, 18);
+      pg.fillRect(this.player.x - 8, this.player.y - 14, 16, 28);  // body
+      pg.fillRect(this.player.x - 7, this.player.y - 30, 14, 16);  // head
     }
 
     // ── Fell in water ────────────────────────────────────────────────────────
+    // Use body.bottom so even a slight dip below water surface triggers reset
     const inWater =
       this.player.x > LEFT_BANK_X &&
       this.player.x < RIGHT_BANK_X &&
-      this.playerBody.top > WATER_TOP + 8;
+      this.playerBody.bottom > WATER_TOP + 8;
 
     if (inWater || this.player.y > H + 50) {
       this.attempts++;

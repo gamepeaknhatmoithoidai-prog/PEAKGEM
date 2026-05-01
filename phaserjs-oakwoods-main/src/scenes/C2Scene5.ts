@@ -88,11 +88,11 @@ export class C2Scene5 extends Phaser.Scene {
     const baseY = H * 0.72;
 
     // Ama K'Nơi — sitting left; crop 683×1024 → display 57×85
-    this.placeCharacter(160, baseY - 10, 'ama-knoi', "Ama K'Nơi", 57, 85);
-    // K'Brơi — standing center; crop 682×682 → display 85×85
-    this.placeCharacter(W / 2, baseY - 20, 'kbroi', "K'Brơi", 85, 85);
-    // Thuận — standing right; crop 576×576 → display 85×85
-    this.placeCharacter(W - 220, baseY - 20, 'thuan', 'Thuận', 85, 85);
+    this.placeCharacter(160, baseY, 'ama-knoi', "Ama K'Nơi", 57, 85);
+    // K'Brơi — standing center; crop 682×682 → display 102×102
+    this.placeCharacter(W / 2, baseY, 'kbroi', "K'Brơi", 102, 102);
+    // Thuận — standing right; crop 576×576 → display 102×102
+    this.placeCharacter(W - 220, baseY, 'thuan', 'Thuận', 102, 102);
 
     // Low table in front of Ama
     const table = this.add.graphics().setDepth(DEPTH_WORLD);
@@ -104,16 +104,18 @@ export class C2Scene5 extends Phaser.Scene {
 
   private placeCharacter(x: number, baseY: number, textureKey: string, name: string, dw: number, dh: number): void {
     if (this.textures.exists(textureKey)) {
-      const img = this.add.image(x, baseY - dh / 2, textureKey)
+      // setOrigin(0.5, 1) anchors at bottom-center so feet land exactly on baseY
+      const img = this.add.image(x, baseY, textureKey)
+        .setOrigin(0.5, 1)
         .setDepth(DEPTH_WORLD + 1);
       charCropFrame0(img, textureKey, dw, dh);
     } else {
       const g = this.add.graphics().setDepth(DEPTH_WORLD + 1);
       g.fillStyle(0x888888);
       g.fillRoundedRect(x - dw / 4, baseY - dh, dw / 2, dh, 4);
-      g.fillEllipse(x, baseY - dh - 12, 22, 22);
+      g.fillRect(x - 11, baseY - dh - 22, 22, 22);  // head as rect, no circle
     }
-    this.add.text(x, baseY - dh - 14, name, {
+    this.add.text(x, baseY - dh - 6, name, {
       fontSize: '10px', fontFamily: 'Arial', color: '#fffbe8',
       stroke: '#000', strokeThickness: 2,
     }).setOrigin(0.5, 1).setDepth(DEPTH_UI);
