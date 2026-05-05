@@ -8,6 +8,7 @@
 import Phaser from 'phaser';
 import { GS } from '../data/GameState';
 import { W, H, DEPTH_BG, DEPTH_WORLD, DEPTH_UI } from '../constants';
+import { placeCharSprite, CHAR_DISPLAY_H } from '../utils/charSprite';
 
 const SCENE_KEY = 'C2S8Scene';
 
@@ -97,20 +98,22 @@ export class C2Scene8 extends Phaser.Scene {
   }
 
   private buildCharacters(): void {
-    // Thuận alone initially — Thắng departs after dialogue
-    this.drawCharacter(W * 0.4, H * 0.68 - 20, 0x2244aa, 'Thuận', false);
-    this.drawCharacter(W * 0.6, H * 0.68 - 20, 0x2a2a2a, 'Nguyễn Văn Thắng', false);
-  }
+    const groundY  = H * 0.68;
+    const gender   = (this.gs.get('gender') as string) || 'male';
+    const thuanKey = gender === 'female' ? 'char-player-f' : 'char-player-m';
 
-  private drawCharacter(x: number, baseY: number, color: number, name: string, _sitting: boolean): void {
-    const g = this.add.graphics().setDepth(DEPTH_WORLD + 1);
-    g.fillStyle(color);
-    g.fillRoundedRect(x - 10, baseY - 52, 20, 52, 4);
-    g.fillEllipse(x, baseY - 64, 22, 22);
-    this.add.text(x, baseY - 90, name, {
-      fontSize: '9px', fontFamily: 'Arial', color: '#fffbe8',
-      stroke: '#000', strokeThickness: 2,
-    }).setOrigin(0.5, 1).setDepth(DEPTH_UI);
+    placeCharSprite(this, W * 0.4, groundY, thuanKey,     DEPTH_WORLD + 1);
+    placeCharSprite(this, W * 0.6, groundY, 'char-thang', DEPTH_WORLD + 1);
+
+    [
+      { x: W * 0.4, name: 'Thuận'              },
+      { x: W * 0.6, name: 'Nguyễn Văn Thắng'   },
+    ].forEach(({ x, name }) => {
+      this.add.text(x, groundY - CHAR_DISPLAY_H - 8, name, {
+        fontSize: '9px', fontFamily: 'Arial', color: '#fffbe8',
+        stroke: '#000', strokeThickness: 2,
+      }).setOrigin(0.5, 1).setDepth(DEPTH_UI);
+    });
   }
 
   private buildTitle(): void {

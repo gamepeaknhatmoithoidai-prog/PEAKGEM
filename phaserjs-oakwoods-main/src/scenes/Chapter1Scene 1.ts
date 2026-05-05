@@ -335,9 +335,9 @@ export class Chapter1Scene extends Phaser.Scene {
   // ═══════════════════════════════════════════════════════════════════
   private buildNPCs(): void {
     const defs = [
-      { key: 'npc-kbroi',   x: 460,  y: GROUND_Y, name: "K'Brơi",      dialog: 'gate-kbroi'    },
-      { key: 'npc-amaknoi', x: 1340, y: GROUND_Y, name: "Ama K'Nơi",   dialog: 'amaknoi-first' },
-      { key: 'npc-yakben',  x: 1640, y: GROUND_Y, name: "Bà Yă K'Ben", dialog: 'yakben-first'  },
+      { key: 'char-kbroi',   x: 460,  y: GROUND_Y, name: "K'Brơi",      dialog: 'gate-kbroi'    },
+      { key: 'char-amaknoi', x: 1340, y: GROUND_Y, name: "Ama K'Nơi",   dialog: 'amaknoi-first' },
+      { key: 'char-yakben',  x: 1640, y: GROUND_Y, name: "Bà Yă K'Ben", dialog: 'yakben-first'  },
     ];
     for (const d of defs) {
       const npc = new NPC(this, { textureKey: d.key, x: d.x, y: d.y, name: d.name, dialogKey: d.dialog });

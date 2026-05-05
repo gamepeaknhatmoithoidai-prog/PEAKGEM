@@ -30,10 +30,22 @@ export class Chapter1Scene extends Phaser.Scene {
   // To add a new story beat: add one entry here — onDialogDone never needs to change.
   private readonly dialogCallbacks: Record<string, (npc: NPC) => void> = {
     'gate-kbroi': (npc) => {
-      // K'Brơi walks to the plant, then re-enables herself for the next conversation.
-      npc.walkTo(920);
-      this.time.delayedCall(5000, () => npc.setDialogKey('plant-intro'));
+      // Skip quiz — go straight to the trash-sorting narrative then mini-game.
+      this.startDialog('trash-narrative', npc);
     },
+
+    'trash-narrative': (_npc) => {
+      // Narrative ends → launch the trash-sorting mini-game as an overlay.
+      this.inDialog = true;
+      this.player.freeze();
+      this.scene.launch('MiniGameTrash');
+      this.scene.pause();
+    },
+
+    // All three trash-result keys share the same follow-up: K'Brơi walks to the plant zone.
+    'kbroi-after-trash-good': (npc) => this.afterTrashReaction(npc),
+    'kbroi-after-trash-ok':   (npc) => this.afterTrashReaction(npc),
+    'kbroi-after-trash-poor': (npc) => this.afterTrashReaction(npc),
 
     'plant-intro': (npc) => {
       // K'Brơi walks toward Yakben, then unlocks Yakben's next dialog.
@@ -41,27 +53,19 @@ export class Chapter1Scene extends Phaser.Scene {
         this.npcYakben.setDialogKey('scene_1_2');
       });
     },
-    'scene_1_2': (npc) => {
-      
+    'scene_1_2': (_npc) => {
       this.npcKbroi.hide();
-      // Small delay so the dialog box fully closes before the conclusion card appears.
-      this.time.delayedCall(300, () => {
-        this.showConclusion(
-          '📖 KẾT LUẬN — Rừng trong sợi vải — Người Mạ\n\n' +
-          'Với người Mạ, thổ cẩm không phải đồ thủ công — đó là ngôn ngữ. ' +
-          'Mỗi hoa văn là một ký ức sinh thái. Khi một loài cây mất đi, màu nhuộm mất — ' +
-          'và một phần ngôn ngữ cộng đồng cũng biến mất.'
-        );
-      });
-
-      this.time.delayedCall(5000 , () => {
-        this.npcYakben.walkTo(1550 , 60 , () => {
-          npc.setDialogKey('forest_gathering')
-        })
-      })
+      this.inDialog = true;
+      this.player.freeze();
+      this.scene.launch('MiniGameWeavingScene');
+      this.scene.pause();
     },
+
+    'scene_1_2_sew_loose':  (npc) => this.afterWeavingConclusion(npc),
+    'scene_1_2_sew_medium': (npc) => this.afterWeavingConclusion(npc),
+    'scene_1_2_sew_good':   (npc) => this.afterWeavingConclusion(npc),
     'forest_gathering' : (npc) => {
-      this.time.delayedCall(1000, () => {
+      this.time.delayedCall(300, () => {
           this.npcKbroi.show(1600)
           this.startDialog('call_help' , this.npcKbroi)
           this.npcKbroi.walkTo(1850 , 60 , () => {
@@ -164,7 +168,9 @@ export class Chapter1Scene extends Phaser.Scene {
       backgroundColor: '#00000099', padding: { x: 7, y: 4 },
     }).setDepth(DEPTH_UI + 5).setScrollFactor(0).setVisible(false);
 
-    this.events.on('dialog-done', this.onDialogDone, this);
+    this.events.on('dialog-done',      this.onDialogDone,      this);
+    this.events.on('trash-game-done',  this.onTrashGameDone,  this);
+    this.events.on('weaving-game-done', this.onWeavingGameDone, this);
 
     this.time.delayedCall(1200, () => {
       this.game.events.emit('notify', 'WASD/←→ di chuyển  •  SPACE nhảy  •  E tương tác', '#88ff66');
@@ -381,17 +387,17 @@ export class Chapter1Scene extends Phaser.Scene {
     // 4×2 sheet (amaknoi):    frame 512×1024 px, scale 0.11 → displayed ~113 px tall.
     //   feet at 90 % of frame → world offset 1024*0.9/2*0.11 ≈ 51 px → y = GROUND_Y - 51.
     const defs = [
-      { key: 'npc-kbroi',   x: 460,  y: GROUND_Y - 46, name: "K'Brơi",      dialog: 'gate-kbroi',    scale: 0.15 },
-      // { key: 'npc-amaknoi', x: 1800, y: GROUND_Y - 46, name: "Ama K'Nơi",   dialog: 'amaknoi-first', scale: 0.15 },
-      { key: 'npc-yakben',  x: 1340, y: GROUND_Y - 46, name: "Bà Yă K'Ben",  scale: 0.15 },
+      { key: 'char-kbroi',  x: 460,  y: GROUND_Y, name: "K'Brơi",     dialog: 'gate-kbroi' },
+      // { key: 'char-amaknoi', x: 1800, y: GROUND_Y, name: "Ama K'Nơi", dialog: 'amaknoi-first' },
+      { key: 'char-yakben', x: 1340, y: GROUND_Y, name: "Bà Yă K'Ben", dialog: 'scene_1_2' },
     ];
     for (const d of defs) {
-      const npc = new NPC(this, { textureKey: d.key, x: d.x, y: d.y, name: d.name, dialogKey: d.dialog, scale: d.scale });
+      const npc = new NPC(this, { textureKey: d.key, x: d.x, y: d.y, name: d.name, dialogKey: d.dialog });
       npc.startIdleAnim();
       this.npcs.push(npc);
-      if (d.key === 'npc-kbroi')   this.npcKbroi   = npc;
-      if (d.key === 'npc-amaknoi') this.npcAmaknoi = npc;
-      if (d.key === 'npc-yakben')  this.npcYakben  = npc;
+      if (d.key === 'char-kbroi')   this.npcKbroi   = npc;
+      if (d.key === 'char-amaknoi') this.npcAmaknoi = npc;
+      if (d.key === 'char-yakben')  this.npcYakben  = npc;
     }
   }
 
@@ -426,7 +432,7 @@ export class Chapter1Scene extends Phaser.Scene {
     // Hint
     let hint = '';
     if (nearDeer)                         hint = this.deerRescuing ? '' : '🦌 Giữ E để gỡ bẫy cho hươu';
-    else if (nearNPC && !nearNPC.isDone)  hint = `💬 E — Nói chuyện với ${nearNPC.npcName}`;
+    else if (nearNPC && !nearNPC.isDone && nearNPC.dialogKey)  hint = `💬 E — Nói chuyện với ${nearNPC.npcName}`;
 
     if (hint) {
       this.hintText.setText(hint).setVisible(true);
@@ -440,7 +446,7 @@ export class Chapter1Scene extends Phaser.Scene {
 
     // E key actions
     if (this.player.isInteractJustPressed()) {
-      if (nearNPC && !nearNPC.isDone) { this.startDialog(nearNPC.dialogKey, nearNPC); return; }
+      if (nearNPC && !nearNPC.isDone && nearNPC.dialogKey) { this.startDialog(nearNPC.dialogKey, nearNPC); return; }
     }
 
     // Deer rescue hold
@@ -548,6 +554,7 @@ export class Chapter1Scene extends Phaser.Scene {
   // ═══════════════════════════════════════════════════════════════════
   // Start dialog (conversation) 
   private startDialog(dialogKey: string, npc: NPC | null): void {
+    if (!dialogKey) return;
     this.inDialog = true;
     this.player.freeze();
     this._pendingNPC = npc;
@@ -612,6 +619,65 @@ export class Chapter1Scene extends Phaser.Scene {
     if (result?.scoreChange > 0) {
       this.game.events.emit('notify', `+${result.scoreChange} điểm!`, '#f5c518');
     }
+  }
+
+  // Called by MiniGameTrash when the sorting game finishes.
+  // Score: S=30, A=20, B=10, C=5 — maps to the three reaction dialogue tiers.
+  private onTrashGameDone(score: number): void {
+    this.scene.resume();
+    this.inDialog = false;
+    this.player.unfreeze();
+
+    const dialogKey = score >= 20 ? 'kbroi-after-trash-good'
+                    : score >= 10 ? 'kbroi-after-trash-ok'
+                    : 'kbroi-after-trash-poor';
+
+    this.time.delayedCall(500, () => {
+      this.startDialog(dialogKey, this.npcKbroi);
+    });
+  }
+
+  // Called by MiniGameWeavingScene when weaving finishes.
+  private onWeavingGameDone(data: { result: string; quality: number }): void {
+    this.scene.resume();
+    this.inDialog = false;
+    this.player.unfreeze();
+
+    const resultToKey: Record<string, string> = {
+      perfect: 'scene_1_2_sew_good',
+      good:    'scene_1_2_sew_good',
+      ok:      'scene_1_2_sew_medium',
+      partial: 'scene_1_2_sew_loose',
+      poor:    'scene_1_2_sew_loose',
+    };
+    const dialogKey = resultToKey[data.result] ?? 'scene_1_2_sew_medium';
+    this.time.delayedCall(400, () => {
+      this.startDialog(dialogKey, this.npcYakben);
+    });
+  }
+
+  // K'Brơi walks toward the plant zone after the trash mini-game reaction.
+  private afterTrashReaction(npc: NPC): void {
+    npc.walkTo(920, 60, () => {
+      this.time.delayedCall(300, () => npc.setDialogKey('plant-intro'));
+    });
+  }
+
+  // Runs after K'Ben's reaction dialogue — shows conclusion then continues to forest_gathering.
+  private afterWeavingConclusion(npc: NPC): void {
+    this.time.delayedCall(300, () => {
+      this.showConclusion(
+        '📖 KẾT LUẬN — Rừng trong sợi vải — Người Mạ\n\n' +
+        'Với người Mạ, thổ cẩm không phải đồ thủ công — đó là ngôn ngữ. ' +
+        'Mỗi hoa văn là một ký ức sinh thái. Khi một loài cây mất đi, màu nhuộm mất — ' +
+        'và một phần ngôn ngữ cộng đồng cũng biến mất.'
+      );
+    });
+    this.time.delayedCall(300, () => {
+      this.npcYakben.walkTo(1550, 60, () => {
+        npc.setDialogKey('forest_gathering');
+      });
+    });
   }
 
   // ═══════════════════════════════════════════════════════════════════

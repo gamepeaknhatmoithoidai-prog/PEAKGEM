@@ -99,8 +99,7 @@ export class MiniGameDossier extends Phaser.Scene {
         align: 'center', stroke: '#000', strokeThickness: 1,
       }).setOrigin(0.5).setDepth(3);
 
-      const zone = this.add.zone(fd.x, fd.y, 144, 92).setDepth(2);
-      this.input.setDropZone(zone);
+      const zone = this.add.zone(fd.x, fd.y, 144, 92).setDepth(2).setRectangleDropZone(144, 92);
 
       this.folders.push({ ...fd, zone });
     }

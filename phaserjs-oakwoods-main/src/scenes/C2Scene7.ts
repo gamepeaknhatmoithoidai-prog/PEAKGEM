@@ -6,6 +6,7 @@
 import Phaser from 'phaser';
 import { GS } from '../data/GameState';
 import { W, H, DEPTH_BG, DEPTH_WORLD, DEPTH_UI } from '../constants';
+import { placeCharSprite, CHAR_DISPLAY_H } from '../utils/charSprite';
 
 const SCENE_KEY = 'C2S7Scene';
 
@@ -75,27 +76,22 @@ export class C2Scene7 extends Phaser.Scene {
   }
 
   private buildCharacters(): void {
-    // Thuận — center-left
-    this.drawCharacter(W * 0.32, H * 0.68 - 20, 0x2244aa, 'Thuận', false);
-    // Ông Thắng — center, authoritative posture, darker suit
-    this.drawCharacter(W * 0.55, H * 0.68 - 20, 0x2a2a2a, 'Nguyễn Văn Thắng', false);
-    // Dress details for Thắng
-    const thang = this.add.graphics().setDepth(DEPTH_WORLD + 1.5);
-    thang.fillStyle(0x555555);
-    thang.fillRect(W * 0.55 - 4, H * 0.68 - 30, 8, 12);  // collar
-  }
+    const groundY  = H * 0.68;
+    const gender   = (this.gs.get('gender') as string) || 'male';
+    const thuanKey = gender === 'female' ? 'char-player-f' : 'char-player-m';
 
-  private drawCharacter(x: number, baseY: number, color: number, name: string, sitting: boolean): void {
-    const g = this.add.graphics().setDepth(DEPTH_WORLD + 1);
-    const h = sitting ? 34 : 52;
-    g.fillStyle(color);
-    g.fillRoundedRect(x - 10, baseY - h, 20, h, 4);
-    g.fillEllipse(x, baseY - h - 12, 22, 22);
+    placeCharSprite(this, W * 0.32, groundY, thuanKey,      DEPTH_WORLD + 1);
+    placeCharSprite(this, W * 0.55, groundY, 'char-thang',  DEPTH_WORLD + 1);
 
-    this.add.text(x, baseY - h - 28, name, {
-      fontSize: '9px', fontFamily: 'Arial', color: '#fffbe8',
-      stroke: '#000', strokeThickness: 2,
-    }).setOrigin(0.5, 1).setDepth(DEPTH_UI);
+    [
+      { x: W * 0.32, name: 'Thuận'              },
+      { x: W * 0.55, name: 'Nguyễn Văn Thắng'   },
+    ].forEach(({ x, name }) => {
+      this.add.text(x, groundY - CHAR_DISPLAY_H - 8, name, {
+        fontSize: '9px', fontFamily: 'Arial', color: '#fffbe8',
+        stroke: '#000', strokeThickness: 2,
+      }).setOrigin(0.5, 1).setDepth(DEPTH_UI);
+    });
   }
 
   private buildTitle(): void {

@@ -1,25 +1,28 @@
-/**
- * charCropFrame0 — crop a character spritesheet image to show only the
- * front-facing idle frame (top-left cell), then scale to display size.
- *
- * Known layouts (measured from actual files):
- *   thuan    1728×2304  3 cols × 4 rows → frame 0 = 576×576
- *   kbroi    2048×2048  3 cols × 3 rows → frame 0 = 682×682
- *   ama-knoi 2048×2048  3 cols (top) / 4 cols (walk) → front = 683×1024
- */
-const FRAME0: Record<string, [number, number]> = {
-  'thuan':    [576,  576],
-  'kbroi':    [682,  682],
-  'ama-knoi': [683, 1024],
-};
+import Phaser from 'phaser';
 
-export function charCropFrame0(
-  img: Phaser.GameObjects.Image,
+// All char-*.png files are 2880×2880 spritesheets arranged in a 3×3 grid.
+// Each cell (frame) is 960×960 px.  Frame 0 = idle facing south.
+export const CHAR_IMG_SIZE       = 960;   // frame size (kept for NPC.ts import compat)
+export const CHAR_FRAME          = 0;     // idle south frame index
+export const CHAR_DISPLAY_H      = 185;   // cutscene display height (px)
+export const CHAR_CUTSCENE_SCALE = CHAR_DISPLAY_H / CHAR_IMG_SIZE;  // ≈ 0.193
+export const NPC_CHAR_SCALE      = 86 / CHAR_IMG_SIZE;              // ≈ 0.090, matches player ≈ 86 px tall
+export const CHAR_PORTRAIT_SCALE = 330 / CHAR_IMG_SIZE;             // ≈ 0.344, dialog portrait ≈ 330 px tall
+export const CHAR_SELECT_SCALE   = 160 / CHAR_IMG_SIZE;             // ≈ 0.167, character select ≈ 160 px tall
+
+/**
+ * Place a character (frame 0 of 960×960 spritesheet) with feet at groundY.
+ * Uses unified CHAR_CUTSCENE_SCALE for all cutscene characters.
+ */
+export function placeCharSprite(
+  scene: Phaser.Scene,
+  x: number,
+  groundY: number,
   textureKey: string,
-  displayW: number,
-  displayH: number,
-): void {
-  const [cw, ch] = FRAME0[textureKey] ?? [img.width, img.height];
-  img.setCrop(0, 0, cw, ch);
-  img.setDisplaySize(displayW, displayH);
+  depth: number,
+): Phaser.GameObjects.Sprite {
+  return scene.add.sprite(x, groundY, textureKey, CHAR_FRAME)
+    .setOrigin(0.5, 1)
+    .setScale(CHAR_CUTSCENE_SCALE)
+    .setDepth(depth);
 }

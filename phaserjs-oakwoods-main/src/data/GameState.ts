@@ -24,6 +24,8 @@ export interface State {
   crocodileScore: number; // MiniGameCrocodile — 15 or 30
   firefliesCount: number; // MiniGameFirefly — 0–10+
   dossierScore: number;   // MiniGameDossier — 0–45
+  trashSortScore: number;   // MiniGameTrash — 5, 10, or 20
+  trashSortCorrect: number; // MiniGameTrash — items sorted correctly (0–6)
 }
 
 const DEFAULTS: State = {
@@ -48,6 +50,8 @@ const DEFAULTS: State = {
   crocodileScore: 0,
   firefliesCount: 0,
   dossierScore: 0,
+  trashSortScore: 0,
+  trashSortCorrect: 0,
 };
 
 /** Thin wrapper around Phaser's registry for type-safe access. */

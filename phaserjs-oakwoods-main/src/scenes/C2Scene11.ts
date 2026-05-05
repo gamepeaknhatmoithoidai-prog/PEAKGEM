@@ -8,6 +8,7 @@
 import Phaser from 'phaser';
 import { GS } from '../data/GameState';
 import { W, H, DEPTH_BG, DEPTH_WORLD, DEPTH_UI } from '../constants';
+import { placeCharSprite, CHAR_DISPLAY_H } from '../utils/charSprite';
 
 const SCENE_KEY = 'C2S11Scene';
 
@@ -52,9 +53,6 @@ export class C2Scene11 extends Phaser.Scene {
     g.fillRect(0, H * 0.70, W, H * 0.30);
 
     // Dirt road path
-    g.fillStyle(0x7a5a38);
-    g.fillTrapezoid ? g.fillTrapezoid(W / 2, H, W * 0.15, W * 0.5, H * 0.3) : null;
-    // Fallback road path using polygon
     g.fillStyle(0x8a6840);
     g.fillTriangle(W / 2 - W * 0.08, H, W / 2 + W * 0.08, H, W / 2 + W * 0.25, H * 0.70);
     g.fillTriangle(W / 2 - W * 0.08, H, W / 2 - W * 0.25, H * 0.70, W / 2 + W * 0.25, H * 0.70);
@@ -81,24 +79,24 @@ export class C2Scene11 extends Phaser.Scene {
   }
 
   private buildCharacters(): void {
-    // Ama K'Nơi — gate, left side (central)
-    this.drawCharacter(W * 0.28, H * 0.70 - 10, 0x8b5a2b, 'Ama K\'Nơi', true);
-    // K'Brơi — behind/beside Ama
-    this.drawCharacter(W * 0.40, H * 0.70 - 20, 0x4a3520, 'K\'Brơi', false);
-    // Thuận — right, facing away (about to leave)
-    this.drawCharacter(W * 0.65, H * 0.70 - 20, 0x2244aa, 'Thuận', false);
-  }
+    const groundY  = H * 0.70;
+    const gender   = (this.gs.get('gender') as string) || 'male';
+    const thuanKey = gender === 'female' ? 'char-player-f' : 'char-player-m';
 
-  private drawCharacter(x: number, baseY: number, color: number, name: string, sitting: boolean): void {
-    const g = this.add.graphics().setDepth(DEPTH_WORLD + 1);
-    const h = sitting ? 34 : 52;
-    g.fillStyle(color);
-    g.fillRoundedRect(x - 10, baseY - h, 20, h, 4);
-    g.fillEllipse(x, baseY - h - 12, 22, 22);
-    this.add.text(x, baseY - h - 28, name, {
-      fontSize: '10px', fontFamily: 'Arial', color: '#fffbe8',
-      stroke: '#000', strokeThickness: 2,
-    }).setOrigin(0.5, 1).setDepth(DEPTH_UI);
+    placeCharSprite(this, W * 0.28, groundY, 'char-amaknoi', DEPTH_WORLD + 1);
+    placeCharSprite(this, W * 0.40, groundY, 'char-kbroi',   DEPTH_WORLD + 1);
+    placeCharSprite(this, W * 0.65, groundY, thuanKey,        DEPTH_WORLD + 1);
+
+    [
+      { x: W * 0.28, name: "Ama K'Nơi" },
+      { x: W * 0.40, name: "K'Brơi"    },
+      { x: W * 0.65, name: 'Thuận'      },
+    ].forEach(({ x, name }) => {
+      this.add.text(x, groundY - CHAR_DISPLAY_H - 8, name, {
+        fontSize: '10px', fontFamily: 'Arial', color: '#fffbe8',
+        stroke: '#000', strokeThickness: 2,
+      }).setOrigin(0.5, 1).setDepth(DEPTH_UI);
+    });
   }
 
   private buildTitle(): void {

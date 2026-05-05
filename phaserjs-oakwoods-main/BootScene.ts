@@ -31,7 +31,7 @@ export default class BootScene extends Phaser.Scene {
     }
 
     this.load.once(Phaser.Loader.Events.COMPLETE, () => {
-      this.scene.start('GameScene');
+      this.scene.start('MiniGameCrocodile');
     });
 
     this.load.start();

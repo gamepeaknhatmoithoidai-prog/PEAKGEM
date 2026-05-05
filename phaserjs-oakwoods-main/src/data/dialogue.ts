@@ -24,16 +24,16 @@ export const DIALOGS: Record<string, Dialog> = {
 
   // ── CỔNG VÀO / GATE ──────────────────────────────────────────────────
   'gate-kbroi': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Dừng lại. Đây là vùng lõi Vườn Quốc gia. Không phải ai muốn vào cũng vào được.' },
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
+      text: 'Dừng lại. Đây là vùng lõi Vườn Quốc gia. Anh là ai?' },
     { speaker: '{name}',
       text: 'Xin chào. Tôi là sinh viên năm 3. Tôi có giấy giới thiệu từ Khoa Du lịch, muốn nghiên cứu tri thức bản địa người Mạ. Tôi đến đây để làm luận văn nghiên cứu của tôi.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Luận văn. Phỏng vấn. Rồi anh về thành phố viết, đăng, xong. Người Mạ không thiếu người đến hỏi. Họ hỏi, ghi, đi. Không ai ở lại.',
       choices: [
-        { text: 'Giấy tờ của tôi hợp lệ — anh không có lý do từ chối',
+        { text: 'Giấy tờ của tôi hợp lệ. Anh không có lý do từ chối',
           trust: 0, score: 0, next: 'choice 1', decision: 'gate_patient' },
-        { text: 'Anh nói đúng. Tôi không hứa mình sẽ khác. Nhưng cho tôi ở lại học — không phỏng vấn, chỉ học."',
+        { text: 'Anh nói đúng. Tôi không hứa mình sẽ khác. Nhưng cho tôi ở lại học, tôi không phỏng vấn, chỉ học."',
           trust: 7, score: 15, next: 'choice 2', decision: 'gate_eager' },
         { text: 'Được rồi. Tôi tự tìm đường." [bật GPS]',
           trust: 0, score: 5, next: 'choice 3', decision: 'gate_pushy' },
@@ -42,74 +42,93 @@ export const DIALOGS: Record<string, Dialog> = {
   ],
 
   'choice 1' : [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Tôi không từ chối. Tôi chỉ nói sự thật.' },
   ],
   'choice 2' : [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Anh biết bơi không?' },
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
+      text: 'Đi theo' },
   ],
   'choice 3' : [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'GPS không có tín hiệu trong đó. Anh sẽ lạc trong 20 phút.' },
+  ],
+
+  // Narrative beat — Thuận sees the trash, K'Brơi reacts. Then mini-game launches.
+  'trash-narrative': [
+    { speaker: 'Thuận',
+      text: '{name} nhìn xuống chân mình. Một túi rác du khách để lại bị gió thổi tung, vương vãi ngay trước cổng rừng.' },
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
+      text: '[nhìn đống rác, giọng vẫn đều] Muốn vào rừng, phải biết cách tôn trọng nó trước đã.' },
+  ],
+
+  // K'Brơi reaction after trash game — auto-evaluated by performance.
+  'kbroi-after-trash-good': [
+    { speaker: 'Dẫn chuyện', text: '[ ✅ Phân loại sạch sẽ ]' },
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
+      text: '[khẽ gật đầu. Không nói thêm gì.]' },
+  ],
+  'kbroi-after-trash-ok': [
+    { speaker: 'Dẫn chuyện', text: '[ ~ Còn sót vài món ]' },
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
+      text: 'Còn sót vài thứ. Nhưng được rồi.' },
+  ],
+  'kbroi-after-trash-poor': [
+    { speaker: 'Dẫn chuyện', text: '[ ❌ Làm chưa tốt ]' },
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
+      text: 'Rừng không cần người làm nửa vời.' },
   ],
 
   // ── CÂY RỪNG / PLANTS ────────────────────────────────────────────────
   'plant-intro': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: '[chỉ vào cây] Cây cẩm lai này hơn trăm năm rồi, người ngoài nhìn vào thì thấy gỗ quý, còn tụi tôi quen coi nó như một phần của rừng nên không ai nghĩ tới chuyện chặt.' },
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
+      text: '[chỉ vào cây] Cây Tung này hơn trăm năm rồi, người ngoài nhìn vào thì thấy gỗ quý, còn tụi tôi quen coi nó như một phần của rừng nên không ai nghĩ tới chuyện chặt.' },
     { speaker: '{name}',
       text: 'Nhìn vậy mà ở đây vẫn để nó yên như vậy hoài luôn à, không ai từng muốn lấy nó về sao?' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Có chứ, ai cũng từng nghĩ qua thôi, nhưng rồi hiểu ra là có những thứ nếu mình lấy đi thì thứ mất không chỉ là cái cây, mà là cả phần rừng đã giữ nó ở đây từng ấy năm.' },
   ],
 
   // --- CẢNH 1.2: NHÀ BÀ YA K'BEN ---
   'scene_1_2': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Bà hỏi anh có ăn được cơm bếp củi không. Tôi nói có. Đúng không?' },
     { speaker: '{name}',
       text: 'Đúng, cảm ơn bà.' },
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
       text: '[cười] Ngồi đây đi cháu. Tay bà bận nhưng miệng còn rảnh.' },
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
-      text: 'Du lịch. Khách đến, chụp ảnh, đi. Chưa ai hỏi mình hiểu họ cần gì không. Cháu hiểu người Mạ cần gì không?' },
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
+      text: ' Khách du lịch hay ghé đây lắm. Họ đến, chụp ảnh rồi đi. Chưa ai hỏi bà hiểu người Mạ cần gì. Cháu hiểu người Mạ cần gì không?' },
     { speaker: '{name}',
       text: 'Thật ra... không. Đó là lý do cháu đến.' },
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
-      text: '[gật đầu] Câu đó tốt hơn cái luận văn của cháu đó. Muốn học không? Tay rảnh thì làm cùng bà đi.',
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
+      text: '[gật đầu] Câu đó thật thà hơn cái luận văn của cháu rồi đó. Muốn học không? Tay rảnh không? Làm cùng bà đi.',
     },
     { speaker: '{name}',
       text: 'Cháu phải làm thế nào?' },
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
       text: 'Dệt không khó. Khó là giữ được đường may đều và chắc.' },
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
-      text: 'Nhìn tay bà. Đều tay, đều sợi. Đừng vội.' ,
-      choices: [
-        { text: 'May khoảng cách xa, có đoạn lỏng có đoạn chặt',
-          trust: 0, score: 0, next: 'scene_1_2_sew_loose', decision: 'sew_loose' },
-        { text: 'May khoảng cách tương đối đều, vẫn có một số chỗ có khoảng cách không bằng nhau.',
-          trust: 0, score: 5, next: 'scene_1_2_sew_medium', decision: 'sew_medium' },
-        { text: 'Nghe theo hướng dẫn của bà Yă K\'Ben, khoảng cách may đều, sợi chỉ giữ chặt từng lớp vải',
-          trust: 0, score: 10, next: 'scene_1_2_sew_good', decision: 'sew_good' },
-      ],
-    },
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
+      text: 'Nhìn tay bà. Đều tay, đều sợi. Đừng vội.' },
   ],
 
   'scene_1_2_sew_loose' : [
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
-      text: ' (cười nhẹ): Lệch nhịp rồi. Sợi lỏng, sợi chặt.' },
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
-      text: ' Lần đầu ai cũng vậy. Làm lại đi.' },
+    { speaker: 'Dẫn chuyện', text: '[ ❌ CHƯA QUEN — May lệch, không đều ]' },
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
+      text: '(cười nhẹ): Lệch nhịp rồi. Sợi lỏng, sợi chặt.' },
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
+      text: 'Lần đầu ai cũng vậy.' },
   ],
   'scene_1_2_sew_medium' : [
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
-      text: ' Nhìn khá ổn đó, nhưng vẫn còn chỗ lệch. Phải chắc tay hơn.' },
+    { speaker: 'Dẫn chuyện', text: '[ ~ KHÁ — Tương đối đều, còn đôi chỗ lệch ]' },
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
+      text: 'Nhìn khá ổn đó, nhưng vẫn còn chỗ lệch. Phải chắc tay hơn.' },
   ],
   'scene_1_2_sew_good' : [
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
-      text: ' Được rồi. Nhịp đều, sợi giữ chặt.' },
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
+    { speaker: 'Dẫn chuyện', text: '[ ✅ ĐẸP — Chắc tay, thẳng hàng ]' },
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
+      text: 'Được rồi. Nhịp đều, sợi giữ chặt.' },
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
       text: 'Làm vậy, vải mới bền. Hoa văn mới giữ được lâu.' },
   ],
 
@@ -118,11 +137,11 @@ export const DIALOGS: Record<string, Dialog> = {
   
   // --- 1.3 - Nhà bà YA KBEN 2 ---
   'forest_gathering': [
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
       text: 'Đi vào rừng, hái giúp bà ít nguyên liệu để nhuộm vải.' },
     { speaker: '{name}',
       text: 'Cháu cần lấy những gì?' },
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
       text: 'Miễn là để nhuộm vải là được, ta không kén chọn. Tuy nhiên, nhìn kĩ rồi chọn.' },
     { speaker: '{name}',
       text: 'Mình nên hái những cái gì đây?',
@@ -130,26 +149,41 @@ export const DIALOGS: Record<string, Dialog> = {
       selectCount: 2,
       choices: [
         { text: 'Củ nghệ',        score: 1 },
-        { text: 'Lá cây giá tỵ',  score: 1 },
+        { text: 'Lá cây tràm',  score: 1 },
         { text: 'Gõ đỏ',          score: 0 },
         { text: 'Giáng hương',    score: 0 },
       ],
     },
   ],
 
-  // 1.4 - Ven Rừng ---
-
+   'forest_gathering_result_good': [
+    {
+      speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
+      text: '[gật đầu] Đúng rồi. Củ nghệ cho màu vàng, cây chàm cho màu xanh-đen',
+    },
+    {
+      speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
+      text: 'Màu không mua được ở chợ. Màu từ rừng mới giữ được bền.',
+    },
+  ],
+  'forest_gathering_result_bad': [
+    {
+      speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
+      text: '[lắc đầu nhẹ] Củ nghệ và lá cây tràm mới làm được màu đẹp. Cây gõ đỏ và giáng hương không làm được màu gì cả',
+    }
+  ],
+      // 1.4 - Ven Rừng ---
   'call_help' :[
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Đi theo tôi, có con hươu bị bẫy' },
   ],
 
   'scene_1_4': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: '[giọng thấp] Bẫy. Không phải người làng đặt. Còn mới.' },
     { speaker: '{name}',
       text: 'Mình có gỡ ra được không?' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Cẩn thận. Anh giữ thân nó, tôi gỡ dây.',
     },
   ],
@@ -157,17 +191,15 @@ export const DIALOGS: Record<string, Dialog> = {
   'scene_1_4_success': [
     { speaker: 'Dẫn chuyện',
       text: 'Sau khi gỡ, con hươu dừng lại ở mép bụi. Nhìn lại. Rồi biến mất.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: 'Nó nhớ mặt người.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
-      text: '[nói nhỏ]: Không phải tôi nói. Ông tôi nói.' },
+    { speaker: '{name}',
+      text: 'Ai đặt bẫy ở đây vậy?' },
   ],
   'after_secure' : [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Từ đầu mùa khô đến nay tôi thấy 7 cái như thế này' },
     { speaker: '{name}',
       text: 'Anh báo kiểm lâm chưa?' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Rồi và không có gì xảy ra.' },
     { speaker: '{name}',
       text: '[Im lặng. K\'Brơi nhét bẫy vào gùi. Đi tiếp.' +
@@ -177,7 +209,7 @@ export const DIALOGS: Record<string, Dialog> = {
 
   // 1.5 - Góc rừng yên tĩnh ---
   'guess_image' : [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: '[chỉ về phía bụi cây xa] Có gì đó đằng kia từ sáng. Anh chụp ảnh được không?' },
     { speaker: 'Dẫn chuyện', portrait: 'bo-tot',
       text: '',
@@ -191,11 +223,11 @@ export const DIALOGS: Record<string, Dialog> = {
   ],
 
   'scene_1_5': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Bò tót xuống gần làng ban ngày, trong rừng đang có tiếng động làm nó sợ. [nhìn về rừng sâu] Cùng hướng với vết máy móc tuần trước.' },
     { speaker: '{name}',
       text: ' Anh đang nói có người đang làm gì đó trong rừng?' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Hai tuần trước. Tôi đi kiểm tra một mình. Không chỉ một vết. Cả một đường — từ phía suối vào đến gần vùng sinh sản bò tót' },
     { speaker: '{name}',
       text: 'Trời. Anh báo ai chưa? K\'Brơi: Kiểm lâm Hùng. Quen nhà này từ hồi tôi còn nhỏ. Ông ấy bảo để xem. ' },
@@ -203,11 +235,11 @@ export const DIALOGS: Record<string, Dialog> = {
       text: '[ngừng, giọng phẳng hơn] Hai tuần. Không có gì' },
     { speaker: '{name}',
       text: 'Anh nghĩ ông ấy...? ' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Tôi không biết ông ấy không làm được — hay không muốn làm. [im lặng ngắn] Nhưng hôm nay con bò tót xuống bìa rừng ban ngày. Nghĩa là tiếng động đó không dừng lại. Nghĩa là hai tuần không đủ nữa.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Tôi cần ai đó không thuộc nơi này giữ bằng chứng. Người trong làng có thể bị ép. Anh thì không.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Anh ở lại thêm được không?' },
     { speaker: '{name}',
       text: '',
@@ -219,12 +251,12 @@ export const DIALOGS: Record<string, Dialog> = {
   ],
 
   'option A': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Ngủ sớm đi. Sáng mai 5h mình đi.' },
   ],
 
   'option B': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Đúng. Nếu anh không chắc — đừng ở lại. Nửa vời còn tệ hơn không làm.' },
     { speaker: 'Dẫn chuyện',
       text: 'Thuận một mình nhìn rừng đêm và quyết định ở lại.' },
@@ -232,54 +264,54 @@ export const DIALOGS: Record<string, Dialog> = {
 
   // ── BẪY / TRAP ───────────────────────────────────────────────────────
   'trap-found': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Dừng lại!' },
     { speaker: '{name}',
       text: 'Chuyện gì vậy?' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Bẫy. Ai đó đặt bẫy trái phép trong vùng lõi. Con hươu đang bị kẹt kìa.' },
     { speaker: '{name}',
       text: 'Phải giúp nó ngay! Làm sao bây giờ?' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Không được chạy ào đến. Nó sẽ hoảng loạn, giãy đạp mà tự thương nặng hơn. Cần tiếp cận từ từ.' },
   ],
 
   'trap-saved': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Tốt. Anh/chị làm đúng rồi.' },
     { speaker: '{name}',
       text: 'Con hươu nhỏ quá... Ai lại nhẫn tâm đặt bẫy ở đây?' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Bẫy này không phải của kẻ săn trộm thông thường. Trông chuyên nghiệp hơn nhiều.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: '(Lầm bầm) Phải điều tra thêm...' },
   ],
 
   // ── AMA K'NƠI ────────────────────────────────────────────────────────
   'amaknoi-first': [
-    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
       text: 'K\'Brơi dẫn khách về. Ngồi xuống đây con, ngồi.' },
     { speaker: '{name}',
       text: 'Thưa Ama, con đến để học về tri thức bản địa của người Mạ.' },
-    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
       text: 'Tri thức không học trong sách được. Phải sống với rừng qua nhiều thế hệ mới có.' },
-    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
       text: 'Con biết cây bép không? Cây can dại? Cây mặt cắt?' },
     { speaker: '{name}',
       text: 'Dạ... con chưa biết ạ.' },
-    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
       text: 'Tốt. Biết mình không biết — đó là bước đầu tiên. Đi với K\'Brơi vào rừng. Học từ cái cây, không phải từ sách.' },
   ],
 
   // ── BÀ YĂ K'BEN ──────────────────────────────────────────────────────
   'yakben-first': [
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
       text: 'Khách thành phố ghé thăm à? Ngồi đây, ngồi. Già đang dệt.' },
     { speaker: '{name}',
       text: 'Bà ơi, màu vải đẹp quá! Bà nhuộm bằng gì vậy?' },
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
       text: 'Cây rừng hết. Cây mặt cắt cho màu đỏ sẫm. Cây cẩm lai cho vàng. Vỏ cây chay cho nâu đen.' },
-    { speaker: 'Bà Yă K\'Ben', portrait: 'npc-yakben',
+    { speaker: 'Bà Yă K\'Ben', portrait: 'char-yakben',
       text: 'Nếu rừng mất... già này không còn gì để dệt. Kỹ thuật nghìn năm này sẽ theo già về với đất thôi.' },
   ],
 
@@ -287,13 +319,13 @@ export const DIALOGS: Record<string, Dialog> = {
   'evidence-found': [
     { speaker: '{name}',
       text: 'K\'Brơi... những cái cọc này là gì vậy? Cọc khảo sát?' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: '...' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Khảo sát địa chất. Nhưng khu này thuộc vùng bảo vệ nghiêm — không ai có quyền vào.' },
     { speaker: '{name}',
       text: 'Ai vào đây được? Làm sao qua được trạm kiểm lâm?' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: '...',
       choices: [
         { text: '[Lấy điện thoại, chụp ảnh bằng chứng]',
@@ -307,14 +339,14 @@ export const DIALOGS: Record<string, Dialog> = {
   'evidence-photo': [
     { speaker: '{name}',
       text: '[Chụp ảnh tỉ mỉ từng cọc khảo sát] Cần ghi lại hết bằng chứng này.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Tốt. Có bằng chứng mới tố cáo được.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Tôi cần nói với anh/chị một điều... Tôi biết người liên quan đến việc này. Nhưng không phải ở đây.' },
   ],
 
   'evidence-skip': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Đi qua bằng chứng như vậy... Không có bằng chứng thì nói ai nghe?' },
   ],
 
@@ -325,22 +357,22 @@ export const DIALOGS: Record<string, Dialog> = {
   'c2s1-intro': [
     { speaker: '{name}',
       text: 'K\'Brơi, hôm nay mình đi tuyến nào? Em cần ghi vào nhật ký thực địa.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Đứng lại.' },
     { speaker: '{name}',
       text: 'Dây đo khảo sát? Ai đo gì ở đây vậy?' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Câu hỏi đúng rồi đó.' },
   ],
 
   'c2s1-postgame': [
     { speaker: '{name}',
       text: 'Dây đo, GPS, dấu đánh cây… tất cả đều cùng một hướng. Đây không phải ngẫu nhiên.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Con đường này… trước đây không có.' },
     { speaker: '{name}',
       text: 'Nhưng trong hồ sơ Vườn Quốc gia cũng không có dự án nào ở đây.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Không có. Chính thức là vậy.' },
   ],
 
@@ -355,11 +387,11 @@ export const DIALOGS: Record<string, Dialog> = {
   'c2s2-postgame': [
     { speaker: '{name}',
       text: 'Họ đang làm gì ở đây mà hung hăng vậy? Rừng quốc gia mà!' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Đó là lý do họ không muốn bị chụp ảnh.' },
     { speaker: '{name}',
       text: 'Mình cần thêm bằng chứng. Nhưng bây giờ họ biết mặt rồi.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Tối mình đi lại. Trong đêm — tôi không quen. Nhưng anh muốn không?' },
     { speaker: '{name}',
       text: 'Muốn.' },
@@ -367,7 +399,7 @@ export const DIALOGS: Record<string, Dialog> = {
 
   // ── Cảnh 3: Chụp Ảnh Bằng Chứng ───────────────────────────────────
   'c2s3-intro': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Đừng lại gần. Ghi lại những gì cần thiết thôi.' },
     { speaker: '{name}',
       text: 'Em sẽ chụp. Nhưng phải nhanh.' },
@@ -376,53 +408,53 @@ export const DIALOGS: Record<string, Dialog> = {
   'c2s3-postgame': [
     { speaker: '{name}',
       text: 'Có rồi… nhưng chưa đủ.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Chừng này… chỉ đủ để nghi ngờ.' },
   ],
 
   // ── Cảnh 4: Ẩn Náu & Di Chuyển Cẩn Thận ───────────────────────────
   'c2s4-intro': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Đặt gót xuống trước. Cảm nhận đất. Rồi mới đặt cả bàn chân.' },
     { speaker: '{name}',
       text: 'Như này à... nhẹ hơn rồi.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Đứng. Đừng thở mạnh.' },
   ],
 
   // ── CHƯƠNG 2 ──────────────────────────────────────────────────────────
   'ch2-intro': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Anh/chị đã chứng minh mình khác người bình thường. Vậy tôi sẽ chia sẻ điều này.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Dự án thủy điện đang lên kế hoạch xây đập ngay phía bắc khu lõi. Nếu xây xong, nước sẽ nhấn chìm toàn bộ làng Mạ và rừng nguyên sinh này.' },
     { speaker: '{name}',
       text: 'Thủy điện? Trong vườn quốc gia? Điều đó... hợp pháp không?' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Không. Nhưng nếu báo cáo đánh giá tác động môi trường bị làm giả...' },
     { speaker: '{name}',
       text: 'Chúng ta cần bằng chứng. Càng nhiều càng tốt.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Đúng. Đi với tôi. Phải thu thập trước khi họ xóa dấu vết.' },
   ],
 
   'ch2-lan': [
-    { speaker: 'Lan', portrait: 'npc-lan',
+    { speaker: 'Lan', portrait: 'char-lan',
       text: 'Anh/chị là sinh viên mà K\'Brơi nhắc đến phải không? Tôi là Lan, kiểm lâm khu A.' },
-    { speaker: 'Lan', portrait: 'npc-lan',
+    { speaker: 'Lan', portrait: 'char-lan',
       text: 'Tôi cũng đang điều tra những hoạt động khảo sát bất thường này. Cần ít nhất 4 bằng chứng rõ ràng mới tố cáo được.' },
     { speaker: '{name}',
       text: 'Chúng tôi đã có một số rồi. Sẽ tìm thêm.' },
-    { speaker: 'Lan', portrait: 'npc-lan',
+    { speaker: 'Lan', portrait: 'char-lan',
       text: 'Cẩn thận. Người phía sau dự án này có quan hệ rộng. Đừng để họ biết anh/chị đang thu thập bằng chứng.' },
   ],
 
   'ch2-hung': [
-    { speaker: 'Hùng', portrait: 'npc-hung',
+    { speaker: 'Hùng', portrait: 'char-hung',
       text: 'Anh/chị... đang làm gì ở đây vậy?' },
     { speaker: '{name}',
       text: 'Tôi đang điều tra. Anh là kiểm lâm viên — anh có biết về những cọc khảo sát trong khu lõi không?' },
-    { speaker: 'Hùng', portrait: 'npc-hung',
+    { speaker: 'Hùng', portrait: 'char-hung',
       text: '... Tôi... tôi không biết gì cả.' },
     { speaker: '{name}',
       text: 'Anh Hùng... K\'Brơi kể về anh. Anh quen gia đình cậu ấy từ lâu. Nếu anh biết gì, nói thật đi.',
@@ -436,27 +468,27 @@ export const DIALOGS: Record<string, Dialog> = {
   ],
 
   'hung-confess': [
-    { speaker: 'Hùng', portrait: 'npc-hung',
+    { speaker: 'Hùng', portrait: 'char-hung',
       text: '(Thở dài) Tôi... tôi đã ký tên vào báo cáo giả. Họ nói chỉ cần chữ ký thôi. Nhưng tôi biết điều đó sai.' },
-    { speaker: 'Hùng', portrait: 'npc-hung',
+    { speaker: 'Hùng', portrait: 'char-hung',
       text: 'Tôi có thể cung cấp bản sao báo cáo thật. Đó là bằng chứng mạnh nhất anh/chị có thể có.' },
   ],
 
   'hung-cornered': [
-    { speaker: 'Hùng', portrait: 'npc-hung',
+    { speaker: 'Hùng', portrait: 'char-hung',
       text: '...' },
-    { speaker: 'Hùng', portrait: 'npc-hung',
+    { speaker: 'Hùng', portrait: 'char-hung',
       text: 'Tôi không nhận tiền. Tôi bị ép. Gia đình tôi... thôi, không nói thêm nữa. Hãy cẩn thận.' },
   ],
 
   'ch2-thang': [
-    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'char-thang',
       text: 'Ồ! Sinh viên du lịch phải không? Tôi là Thắng, giám đốc dự án năng lượng khu vực.' },
-    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'char-thang',
       text: 'Dự án thủy điện sẽ mang điện đến 50.000 hộ dân vùng sâu vùng xa. Đó là ánh sáng văn minh cho người nghèo.' },
     { speaker: '{name}',
       text: 'Nhưng thưa ông — điều đó có nghĩa làng người Mạ và rừng nguyên sinh sẽ bị nhấn chìm?' },
-    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'char-thang',
       text: 'Sự phát triển bao giờ cũng có cái giá. 200 hecta rừng đổi lấy điện cho hàng vạn người — đó là đánh đổi xứng đáng.',
       choices: [
         { text: '"Ông nói đúng. Phát triển kinh tế là quan trọng nhất"',
@@ -470,19 +502,19 @@ export const DIALOGS: Record<string, Dialog> = {
   ],
 
   'thang-agree': [
-    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'char-thang',
       text: 'Đúng vậy! Tư duy đúng đắn. Sau khi tốt nghiệp, ghé tìm tôi — công ty cần người như thế.' },
   ],
 
   'thang-push': [
-    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'char-thang',
       text: 'Hừm. Lý thuyết hay lắm. Người nghèo không sống được bằng "hệ sinh thái". Cháu còn trẻ, chưa hiểu thực tế.' },
   ],
 
   'thang-expose': [
-    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'char-thang',
       text: '...' },
-    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'char-thang',
       text: 'Cháu cẩn thận với những gì cháu nghĩ mình biết.' },
     { speaker: '{name}',
       text: '[Nhìn thẳng] Tôi biết đủ rồi.' },
@@ -494,20 +526,20 @@ export const DIALOGS: Record<string, Dialog> = {
 
   // ── CẢNH 5: HIÊN NHÀ AMA K'NƠI — buổi sáng ──────────────────────────
   'c2s5-intro': [
-    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
       text: 'Ngồi xuống đã. Rừng sáng nay kể gì với hai đứa bây?' },
   ],
 
   'c2s5-post-tea': [
     { speaker: '{name}',
       text: 'Ama... chúng con thấy dấu khảo sát, cọc đo đạc, cây bị đánh dấu hàng loạt. Video phá rừng ở Tà Lài. Con nghĩ đây là chuẩn bị cho dự án thủy điện.' },
-    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
       text: 'K\'Brơi. Mày biết rồi phải không? Biết từ trước khi nó đến đây.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Con biết từ tháng trước.' },
-    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
       text: 'Sao không nói?' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Vì người làm chuyện này... con quen.' },
   ],
 
@@ -518,33 +550,33 @@ export const DIALOGS: Record<string, Dialog> = {
   ],
 
   'c2s6-post-flashlight': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Người làm sai lệch báo cáo hiện trạng rừng cho đội của ông Thắng... là anh Hùng.' },
     { speaker: '{name}',
       text: 'Hùng — kiểm lâm viên Hùng? Người hay ghé qua nhà ông không?' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Đúng. Anh ấy quen gia đình con từ nhỏ. Cha con và anh Hùng từng học chung.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Anh Hùng có con nhỏ. Vợ bệnh. Ông Thắng trả tiền nhiều. Con không biết phải làm gì.' },
-    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
       text: 'Rừng không phán xét con người. Rừng chỉ ghi nhớ. Ghi nhớ tất cả.' },
   ],
 
   // ── CẢNH 7: ÔNG THẮNG XUẤT HIỆN ─────────────────────────────────────
   'c2s7-thang': [
-    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'char-thang',
       text: 'Cậu là Thuận? Sinh viên? Nghe thú vị lắm.' },
     { speaker: '{name}',
       text: 'Vâng. Ông là...?' },
-    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'char-thang',
       text: 'Nguyễn Văn Thắng. Giám đốc điều hành phân khu. Tôi nghe cậu đang tìm hiểu tiềm năng phát triển khu vực này — trùng hợp, tôi cũng vậy.' },
     { speaker: '{name}',
       text: 'Ông... phát triển theo hướng nào ạ?' },
-    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'char-thang',
       text: 'Thủy điện. Cung cấp điện và việc làm cho hàng chục nghìn hộ dân. Đây là bước tiến văn minh mà khu vực này đang cần.' },
     { speaker: '{name}',
       text: 'Còn rừng? Còn người Mạ đang sống ở đây?' },
-    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'char-thang',
       text: 'Cậu trẻ thật. Tiến bộ và bảo tồn không phải lúc nào cũng chống nhau, cậu ạ. Tái định cư có hỗ trợ. Rừng phòng hộ vẫn giữ. Còn những khu bị tác động — đó là cái giá của văn minh.' },
     { speaker: 'Dẫn chuyện',
       text: 'Thuận nhìn ông Thắng. Không thấy ánh mắt kẻ xấu. Chỉ thấy ánh mắt người hoàn toàn tin vào điều mình nói.' },
@@ -552,13 +584,13 @@ export const DIALOGS: Record<string, Dialog> = {
 
   // ── CẢNH 8: BỊ MUA CHUỘC ────────────────────────────────────────────
   'c2s8-bribe': [
-    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'char-thang',
       text: 'Thuận. Tôi biết cậu chụp ảnh trong rừng hôm qua. Và tôi biết cậu đang làm luận văn.' },
-    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'char-thang',
       text: 'Nghe này — cậu muốn nghiên cứu phát triển bền vững? Tôi tài trợ luận văn. Kinh phí đủ để cậu có chuyến thực địa quốc tế.' },
     { speaker: '{name}',
       text: 'Đổi lại là...?' },
-    { speaker: 'Nguyễn Văn Thắng', portrait: 'npc-thang',
+    { speaker: 'Nguyễn Văn Thắng', portrait: 'char-thang',
       text: 'Đổi lại là cậu không lan truyền thông tin chưa kiểm chứng. Gây hoang mang dư luận là tội nặng. Cậu còn trẻ — đừng để một quyết định dại dột phá nát tương lai.',
       choices: [
         { text: 'Được thôi, tôi đồng ý.',
@@ -573,13 +605,13 @@ export const DIALOGS: Record<string, Dialog> = {
 
   // ── CẢNH 9: LAN XUẤT HIỆN ────────────────────────────────────────────
   'c2s9-lan': [
-    { speaker: 'Lan', portrait: 'npc-lan',
+    { speaker: 'Lan', portrait: 'char-lan',
       text: 'Tôi là Lan. Kiểm lâm viên. Tôi biết Thuận và K\'Brơi đã làm gì hai ngày qua. Tôi muốn giúp — nhưng chúng ta cần hệ thống hóa lại.' },
     { speaker: '{name}',
       text: 'Chị Lan biết về dự án này từ trước à?' },
-    { speaker: 'Lan', portrait: 'npc-lan',
+    { speaker: 'Lan', portrait: 'char-lan',
       text: 'Biết. Nhưng tôi thiếu bằng chứng thực địa — đúng cái anh đang có. Còn anh thiếu dữ liệu khoa học — đúng cái tôi có. Mình cần nhau.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Tôi tin chị Lan.' },
     { speaker: 'Dẫn chuyện',
       text: 'Lan trao cho Thuận một USB và bản báo cáo khoa học. Rồi biến mất — đi làm phần của mình.' },
@@ -587,15 +619,15 @@ export const DIALOGS: Record<string, Dialog> = {
 
   // Biến thể khi Thuận đã chọn đồng ý với Thắng (choice A)
   'c2s9-lan-warned': [
-    { speaker: 'Lan', portrait: 'npc-lan',
+    { speaker: 'Lan', portrait: 'char-lan',
       text: 'Tôi là Lan. Kiểm lâm viên. Tôi biết Thuận và K\'Brơi đã làm gì hai ngày qua. Tôi muốn giúp — nhưng chúng ta cần hệ thống hóa lại.' },
     { speaker: '{name}',
       text: 'Chị Lan biết về dự án này từ trước à?' },
-    { speaker: 'Lan', portrait: 'npc-lan',
+    { speaker: 'Lan', portrait: 'char-lan',
       text: 'Biết. Nhưng tôi thiếu bằng chứng thực địa — đúng cái anh đang có. Còn anh thiếu dữ liệu khoa học — đúng cái tôi có. Mình cần nhau.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Tôi tin chị Lan.' },
-    { speaker: 'Lan', portrait: 'npc-lan',
+    { speaker: 'Lan', portrait: 'char-lan',
       text: 'À — và nếu anh đã nói gì với ông Thắng tối qua... tôi không cần biết. Nhưng từ giờ hãy cẩn thận hơn.' },
     { speaker: 'Dẫn chuyện',
       text: 'Lan trao cho Thuận một USB và bản báo cáo khoa học. Rồi biến mất — đi làm phần của mình.' },
@@ -603,23 +635,23 @@ export const DIALOGS: Record<string, Dialog> = {
 
   // ── CẢNH 10: HÙNG THÚ NHẬN ───────────────────────────────────────────
   'c2s10-hung': [
-    { speaker: 'Hùng', portrait: 'npc-hung',
+    { speaker: 'Hùng', portrait: 'char-hung',
       text: 'Thuận... tôi biết cậu biết rồi. K\'Brơi đã nói đúng không.' },
     { speaker: '{name}',
       text: '...' },
-    { speaker: 'Hùng', portrait: 'npc-hung',
+    { speaker: 'Hùng', portrait: 'char-hung',
       text: 'Tôi không muốn làm chuyện này. Nhưng vợ tôi bệnh nặng. Tiền chữa trị tôi không có. Ông Thắng đưa ra số tiền đủ để lo cho cô ấy hai năm. Tôi không đủ mạnh để từ chối.' },
-    { speaker: 'Hùng', portrait: 'npc-hung',
+    { speaker: 'Hùng', portrait: 'char-hung',
       text: 'Tôi không thể đứng trước K\'Brơi được. Tôi biết cha nó — anh ấy là người tốt. Nhưng tôi không thể để vợ tôi... Thuận, tôi không biết làm gì nữa.' },
   ],
 
   // ── CẢNH 11: TIỄN BIỆt / LỜI CHÀO AMA ──────────────────────────────
   'c2s11-farewell': [
-    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
       text: 'Con à. Ông hỏi một câu thôi. Con về thành phố — con mang theo gì?' },
     { speaker: '{name}',
       text: 'Con... con mang theo sự thật, Ama.' },
-    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
       text: 'Thì mang cho đúng chỗ.' },
     { speaker: 'Dẫn chuyện',
       text: 'K\'Brơi đứng sau Ama K\'Nơi. Không nói gì. Chỉ nhìn Thuận — lần đầu tiên ánh mắt không còn cảnh giác.' },
@@ -627,29 +659,29 @@ export const DIALOGS: Record<string, Dialog> = {
 
   // ── KẾT THÚC / ENDINGS ───────────────────────────────────────────────
   'ending-good': [
-    { speaker: 'Lan', portrait: 'npc-lan',
+    { speaker: 'Lan', portrait: 'char-lan',
       text: 'Nhờ bằng chứng anh/chị thu thập, chúng tôi đủ cơ sở tố cáo chính thức. Dự án thủy điện bị đình chỉ điều tra.' },
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Rừng vẫn còn đó. Làng Mạ vẫn còn đó. Đó là điều quan trọng nhất.' },
     { speaker: '{name}',
       text: 'Luận văn của tôi bây giờ không chỉ là học thuật nữa. Nó là câu chuyện thật.' },
-    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
       text: 'Rừng không kết thúc ở một chiến thắng. Nó cần người có tâm đứng bên nó mỗi ngày. Cảm ơn con.' },
   ],
 
   'ending-neutral': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Dự án bị làm chậm lại. Nhưng chưa kết thúc. Cuộc chiến vẫn còn.' },
     { speaker: '{name}',
       text: 'Tôi sẽ trở lại. Lần này không phải để viết luận văn.' },
   ],
 
   'ending-bad': [
-    { speaker: 'K\'Brơi', portrait: 'npc-kbroi',
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
       text: 'Dự án được thông qua. Họ sẽ bắt đầu xây vào mùa khô.' },
     { speaker: '{name}',
       text: '...' },
-    { speaker: 'Ama K\'Nơi', portrait: 'npc-amaknoi',
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
       text: 'Đây không phải lần đầu rừng bị đe dọa. Và cũng sẽ không phải lần cuối. Quan trọng là con đã học được gì.' },
   ],
 };

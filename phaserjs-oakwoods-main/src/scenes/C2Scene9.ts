@@ -7,6 +7,7 @@
 import Phaser from 'phaser';
 import { GS } from '../data/GameState';
 import { W, H, DEPTH_BG, DEPTH_WORLD, DEPTH_UI } from '../constants';
+import { placeCharSprite, CHAR_DISPLAY_H } from '../utils/charSprite';
 
 const SCENE_KEY = 'C2S9Scene';
 
@@ -72,30 +73,31 @@ export class C2Scene9 extends Phaser.Scene {
   }
 
   private buildCharacters(): void {
-    // Thuận — left
-    this.drawCharacter(W * 0.30, H * 0.68 - 20, 0x2244aa, 'Thuận', false);
-    // K'Brơi — center
-    this.drawCharacter(W * 0.48, H * 0.68 - 20, 0x4a3520, 'K\'Brơi', false);
-    // Lan — right, slightly forward
-    this.drawCharacter(W * 0.65, H * 0.68 - 20, 0x1a4488, 'Lan', false);
+    const groundY  = H * 0.68;
+    const gender   = (this.gs.get('gender') as string) || 'male';
+    const thuanKey = gender === 'female' ? 'char-player-f' : 'char-player-m';
+
+    placeCharSprite(this, W * 0.30, groundY, thuanKey,     DEPTH_WORLD + 1);
+    placeCharSprite(this, W * 0.48, groundY, 'char-kbroi', DEPTH_WORLD + 1);
+    placeCharSprite(this, W * 0.65, groundY, 'char-lan',   DEPTH_WORLD + 1);
+
+    [
+      { x: W * 0.30, name: 'Thuận'   },
+      { x: W * 0.48, name: "K'Brơi"  },
+      { x: W * 0.65, name: 'Lan'     },
+    ].forEach(({ x, name }) => {
+      this.add.text(x, groundY - CHAR_DISPLAY_H - 8, name, {
+        fontSize: '9px', fontFamily: 'Arial', color: '#fffbe8',
+        stroke: '#000', strokeThickness: 2,
+      }).setOrigin(0.5, 1).setDepth(DEPTH_UI);
+    });
 
     // USB / report visual
     const usb = this.add.graphics().setDepth(DEPTH_WORLD + 1.5);
     usb.fillStyle(0x888888);
-    usb.fillRoundedRect(W * 0.65 - 8, H * 0.68 - 82, 16, 10, 2);
+    usb.fillRoundedRect(W * 0.65 - 8, groundY - 82, 16, 10, 2);
     usb.fillStyle(0x333333);
-    usb.fillRect(W * 0.65 - 4, H * 0.68 - 92, 8, 12);
-  }
-
-  private drawCharacter(x: number, baseY: number, color: number, name: string, _sitting: boolean): void {
-    const g = this.add.graphics().setDepth(DEPTH_WORLD + 1);
-    g.fillStyle(color);
-    g.fillRoundedRect(x - 10, baseY - 52, 20, 52, 4);
-    g.fillEllipse(x, baseY - 64, 22, 22);
-    this.add.text(x, baseY - 90, name, {
-      fontSize: '9px', fontFamily: 'Arial', color: '#fffbe8',
-      stroke: '#000', strokeThickness: 2,
-    }).setOrigin(0.5, 1).setDepth(DEPTH_UI);
+    usb.fillRect(W * 0.65 - 4, groundY - 92, 8, 12);
   }
 
   private buildTitle(): void {

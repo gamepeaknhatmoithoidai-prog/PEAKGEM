@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GS } from '../data/GameState';
 import { DIALOGS, Dialog, Line, formatText } from '../data/dialogue';
 import { W, H } from '../constants';
+import { CHAR_PORTRAIT_SCALE } from '../utils/charSprite';
 
 interface DialogLaunchData {
   dialogKey: string;
@@ -21,7 +22,7 @@ export class DialogScene extends Phaser.Scene {
   private box!: Phaser.GameObjects.Graphics;
   private speakerText!: Phaser.GameObjects.Text;
   private bodyText!: Phaser.GameObjects.Text;
-  private portrait!: Phaser.GameObjects.Image;
+  private portrait!: Phaser.GameObjects.Sprite;
   private portraitFrame!: Phaser.GameObjects.Image;
   private continueHint!: Phaser.GameObjects.Text;
   private choiceContainer!: Phaser.GameObjects.Container;
@@ -67,9 +68,9 @@ export class DialogScene extends Phaser.Scene {
     this.portraitFrame = this.add.image(78, BOX_Y - 10, 'portrait-frame')
       .setScale(0.9).setDepth(2);
     // Large character portrait behind the dialog box (depth 0.5 = above overlay, below box)
-    this.portrait = this.add.image(W / 2, BOX_Y - BOX_H / 2, 'portrait-frame')
+    this.portrait = this.add.sprite(W / 2, BOX_Y - BOX_H / 2, 'char-player-m', 0)
       .setOrigin(0.5, 1)
-      .setScale(0.5).setDepth(0.5).setVisible(false);
+      .setScale(CHAR_PORTRAIT_SCALE).setDepth(0.5).setVisible(false);
 
     // Speaker name badge
     this.speakerText = this.add.text(148, BOX_Y - BOX_H / 2 + 12, '', {
@@ -119,11 +120,9 @@ export class DialogScene extends Phaser.Scene {
 
     // Portrait
     if (line.portrait && this.textures.exists(line.portrait)) {
-      this.portrait.setTexture(line.portrait).setVisible(true).setScale(0.5);
-      try { this.portrait.setPostPipeline('WhiteKey'); } catch (_) {}
+      this.portrait.setTexture(line.portrait, 0).setVisible(true).setScale(CHAR_PORTRAIT_SCALE);
     } else {
       this.portrait.setVisible(false);
-      try { this.portrait.removePostPipeline('WhiteKey'); } catch (_) {}
     }
 
     // Start typewriter
@@ -335,9 +334,12 @@ export class DialogScene extends Phaser.Scene {
   }
 
   private closeDialog(result: object | null): void {
-    // Notify source scene
+    // Stop BEFORE emitting so the queue ordering is:
+    //   [stop(DialogScene), resume(sourceScene), start(DialogScene, next), pause(sourceScene)]
+    // If we emitted first the stop would land last in the queue and kill the newly
+    // launched DialogScene, freezing the game.
+    this.scene.stop();
     const src = this.scene.get(this.sourceScene);
     if (src) src.events.emit('dialog-done', result);
-    this.scene.stop();
   }
 }

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { INTERACT_RADIUS } from '../constants';
+import { NPC_CHAR_SCALE, CHAR_IMG_SIZE } from '../utils/charSprite';
 
 export interface NPCConfig {
   textureKey: string;
@@ -8,23 +9,26 @@ export interface NPCConfig {
   name: string;
   dialogKey?: string;
   interactRadius?: number;
-  scale?: number;
 }
 
-// NPC container is centred on the sprite's mid-point.
-// At scale 0.18 and 576×576 frames (npc-kbroi):
-//   sprite half-height = 576*0.18/2 = 51.8 px
-//   character feet ≈ frame y=540 → world offset = (540-288)*0.18 = +45.4 px below center
-//   character head ≈ frame y=50  → world offset = (50-288)*0.18  = -42.8 px above center
-// Place the container so feet land at GROUND_Y:  y = GROUND_Y - 45
+// char-*.png are 3×3 spritesheets (960×960 px per frame). Frame 0 = idle south.
+// NPC_CHAR_SCALE = 86/960 ≈ 0.090 → display height ≈ 86 px (matches player scale).
+// Sprite uses setOrigin(0.5, 1) so its bottom (feet) sits at the container's (0,0).
+// Place the container at y = GROUND_Y so feet land exactly on the ground.
 //
-// Text offsets below are measured from the container centre (y=0).
+// Text offsets (relative to container centre = feet position):
+//   displayH = CHAR_IMG_SIZE * NPC_CHAR_SCALE ≈ 86 px
+//   name tag  → y = -(displayH + 8)  ≈ -94
+//   hint      → y = -(displayH + 22) ≈ -108
+//   exclaim   → y = -(displayH + 35) ≈ -121
+
+const DISPLAY_H = Math.round(CHAR_IMG_SIZE * NPC_CHAR_SCALE); // ≈ 101
 
 export class NPC extends Phaser.GameObjects.Container {
   private sprite: Phaser.GameObjects.Sprite;
   private nameTag: Phaser.GameObjects.Text;
   private hint: Phaser.GameObjects.Text;
-  private exclaim: Phaser.GameObjects.Text;   // '!' text (no external asset needed)
+  private exclaim: Phaser.GameObjects.Text;
   private _dialogKey: string;
   readonly npcName: string;
   private _radius: number;
@@ -38,37 +42,24 @@ export class NPC extends Phaser.GameObjects.Container {
     this.npcName = cfg.name;
     this._radius = cfg.interactRadius ?? INTERACT_RADIUS;
 
-    const scale = cfg.scale ?? 0.15;
-
     // ── Sprite ─────────────────────────────────────────────────────────────
-    // Use Sprite (not Image) so Phaser can play frame-based animations.
-    // Fall back to npc-kbroi when the requested texture isn't loaded.
-    const texKey = scene.textures.exists(cfg.textureKey) ? cfg.textureKey : 'npc-kbroi';
-    // Frame 0 = front/idle pose for every NPC spritesheet
-    this.sprite = scene.add.sprite(0, 0, texKey, 0).setScale(scale);
-    // Remove white JPG background via post-FX pipeline
-    try { this.sprite.setPostPipeline('WhiteKey'); } catch (_) {}
-    // Play idle animation if one was registered in BootScene
-    const idleKey = `${texKey}-idle`;
-    if (scene.anims.exists(idleKey)) {
-      this.sprite.play(idleKey);
-    }
+    const texKey = scene.textures.exists(cfg.textureKey) ? cfg.textureKey : 'char-kbroi';
+    this.sprite = scene.add.sprite(0, 0, texKey, 0)
+      .setOrigin(0.5, 1)
+      .setScale(NPC_CHAR_SCALE);
 
     // ── Text labels ────────────────────────────────────────────────────────
-    // Positions are relative to the container centre.
-    // At scale 0.4 the character head is ≈ 45 px above centre → labels at -55 .. -80
-    this.nameTag = scene.add.text(0, -55, cfg.name, {
+    this.nameTag = scene.add.text(0, -(DISPLAY_H + 8), cfg.name, {
       fontSize: '11px', color: '#ffeebb',
       stroke: '#000', strokeThickness: 3, fontFamily: 'Arial',
     }).setOrigin(0.5).setDepth(6);
 
-    this.hint = scene.add.text(0, -69, 'E — Nói chuyện', {
+    this.hint = scene.add.text(0, -(DISPLAY_H + 22), 'E — Nói chuyện', {
       fontSize: '10px', color: '#fff',
       backgroundColor: '#00000099', padding: { x: 5, y: 2 }, fontFamily: 'Arial',
     }).setOrigin(0.5).setDepth(7).setVisible(false);
 
-    // '!' quest marker — implemented as Text so no external image is needed
-    this.exclaim = scene.add.text(0, -81, '!', {
+    this.exclaim = scene.add.text(0, -(DISPLAY_H + 35), '!', {
       fontSize: '18px', fontFamily: 'Arial', fontStyle: 'bold',
       color: '#ffcc00', stroke: '#000', strokeThickness: 3,
     }).setOrigin(0.5).setDepth(8);
@@ -76,10 +67,9 @@ export class NPC extends Phaser.GameObjects.Container {
     scene.add.existing(this);
     this.add([this.sprite, this.nameTag, this.hint, this.exclaim]);
 
-    // Float animation on the '!' marker
     this.floatTween = scene.tweens.add({
       targets: this.exclaim,
-      y: -88,
+      y: -(DISPLAY_H + 43),
       duration: 700,
       yoyo: true,
       repeat: -1,
@@ -100,12 +90,10 @@ export class NPC extends Phaser.GameObjects.Container {
   get dialogKey(): string { return this._dialogKey; }
   get isDone(): boolean { return this._done; }
 
-  /** Hide the NPC. */
   hide(): void {
     this.setVisible(false);
   }
 
-  /** Show the NPC. Optionally teleport to a new position first. */
   show(x?: number, y?: number): void {
     if (x !== undefined) this.x = x;
     if (y !== undefined) this.y = y;
@@ -125,18 +113,11 @@ export class NPC extends Phaser.GameObjects.Container {
     this.floatTween?.stop();
   }
 
-  /** Walk horizontally to a target x, then stop. */
+  /** Walk horizontally to a target x via tween, then stop. */
   walkTo(targetX: number, speed = 60, onArrive?: () => void): void {
     const dx = targetX - this.x;
     if (Math.abs(dx) < 1) { onArrive?.(); return; }
-    // Side-view walk frames face left → flip for right-bound motion.
     const goingRight = dx > 0;
-    this.sprite.setFlipX(false);
-
-    const texKey = this.sprite.texture.key;
-    const walkKey = `${texKey}-walk`;
-    if (this.scene.anims.exists(walkKey)) this.sprite.play(walkKey);
-
     const duration = Math.abs(dx) / speed * 600;
     this.scene.tweens.add({
       targets: this,
@@ -144,9 +125,6 @@ export class NPC extends Phaser.GameObjects.Container {
       duration,
       ease: 'Linear',
       onComplete: () => {
-        this.sprite.stop();
-        // Keep a side-view frame so he doesn't snap back to front-facing.
-        if (this.scene.anims.exists(walkKey)) this.sprite.setFrame(0);
         this.sprite.setFlipX(goingRight);
         onArrive?.();
       },

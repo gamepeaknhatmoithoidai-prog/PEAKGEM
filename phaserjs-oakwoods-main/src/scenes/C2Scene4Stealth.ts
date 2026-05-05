@@ -24,9 +24,9 @@ const STEALTH_MAX_VX = PLAYER_SPEED;   // match Chapter 1 speed
 
 // ── NPC positions ─────────────────────────────────────────────────────────────
 const NPC_DEFS = [
-  { key: 'npc-lan',   x:  460, y: GROUND_Y - 46, name: 'Lan',              dialog: 'ch2-lan',   scale: 0.15 },
-  { key: 'npc-hung',  x: 1700, y: GROUND_Y - 46, name: 'Hùng',             dialog: 'ch2-hung',  scale: 0.15 },
-  { key: 'npc-thang', x: 2600, y: GROUND_Y - 46, name: 'Nguyễn Văn Thắng', dialog: 'ch2-thang', scale: 0.15 },
+  { key: 'char-lan',   x:  460, y: GROUND_Y, name: 'Lan',              dialog: 'ch2-lan'   },
+  { key: 'char-hung',  x: 1700, y: GROUND_Y, name: 'Hùng',             dialog: 'ch2-hung'  },
+  { key: 'char-thang', x: 2600, y: GROUND_Y, name: 'Nguyễn Văn Thắng', dialog: 'ch2-thang' },
 ] as const;
 
 export class C2Scene4Stealth extends Phaser.Scene {
@@ -182,7 +182,7 @@ export class C2Scene4Stealth extends Phaser.Scene {
     for (const d of NPC_DEFS) {
       const npc = new NPC(this, {
         textureKey: d.key, x: d.x, y: d.y,
-        name: d.name, dialogKey: d.dialog, scale: d.scale,
+        name: d.name, dialogKey: d.dialog,
       });
       npc.startIdleAnim();
       this.npcs.push(npc);
@@ -324,7 +324,7 @@ export class C2Scene4Stealth extends Phaser.Scene {
     // Hint text
     let hint = '';
     if (nearNPC && !nearNPC.isDone) hint = `💬 E — Nói chuyện với ${nearNPC.npcName}`;
-    else if (nearPortal)            hint = '⭐ E — Kết thúc & xem kết quả';
+    else if (nearPortal)            hint = 'E — Tiếp tục sang Cảnh 5';
     else                            hint = '→ Tìm và nói chuyện với các nhân vật';
 
     if (hint) {

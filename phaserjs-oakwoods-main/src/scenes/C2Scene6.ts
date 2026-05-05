@@ -9,7 +9,7 @@
 import Phaser from 'phaser';
 import { GS } from '../data/GameState';
 import { W, H, DEPTH_BG, DEPTH_WORLD, DEPTH_UI } from '../constants';
-import { charCropFrame0 } from '../utils/charSprite';
+import { placeCharSprite, CHAR_DISPLAY_H } from '../utils/charSprite';
 
 const SCENE_KEY = 'C2S6Scene';
 
@@ -21,9 +21,6 @@ export class C2Scene6 extends Phaser.Scene {
 
   preload(): void {
     if (!this.textures.exists('bg-scene6')) this.load.image('bg-scene6', 'assets/dohoa/bg-scene6.jpg');
-    if (!this.textures.exists('ama-knoi'))  this.load.image('ama-knoi',  'assets/dohoa/ama-knoi.jpg');
-    if (!this.textures.exists('kbroi'))     this.load.image('kbroi',     'assets/dohoa/kbroi.jpg');
-    if (!this.textures.exists('thuan'))     this.load.image('thuan',     'assets/dohoa/thuan.jpg');
   }
 
   create(): void {
@@ -73,42 +70,39 @@ export class C2Scene6 extends Phaser.Scene {
   }
 
   private buildCharacters(): void {
-    const baseY = H * 0.72;
+    const groundY  = H * 0.72;
+    const gender   = (this.gs.get('gender') as string) || 'male';
+    const thuanKey = gender === 'female' ? 'char-player-f' : 'char-player-m';
 
-    this.placeCharacter(160,       baseY - 10, 'ama-knoi', "Ama K'Nơi", 57,  85);
-    this.placeCharacter(W / 2 - 60, baseY - 20, 'kbroi',   "K'Brơi",    85,  85);
-    this.placeCharacter(W - 220,   baseY - 20, 'thuan',   'Thuận',      85,  85);
+    placeCharSprite(this, 160,        groundY, 'char-amaknoi', DEPTH_WORLD + 1);
+    placeCharSprite(this, W / 2 - 60, groundY, 'char-kbroi',   DEPTH_WORLD + 1);
+    placeCharSprite(this, W - 220,    groundY, thuanKey,        DEPTH_WORLD + 1);
+
+    [
+      { x: 160,        name: "Ama K'Nơi" },
+      { x: W / 2 - 60, name: "K'Brơi"    },
+      { x: W - 220,    name: 'Thuận'      },
+    ].forEach(({ x, name }) => {
+      this.add.text(x, groundY - CHAR_DISPLAY_H - 8, name, {
+        fontSize: '10px', fontFamily: 'Arial', color: '#fffbe8',
+        stroke: '#000', strokeThickness: 2,
+      }).setOrigin(0.5, 1).setDepth(DEPTH_UI);
+    });
 
     // Low table
     const table = this.add.graphics().setDepth(DEPTH_WORLD);
     table.fillStyle(0x7a4520);
-    table.fillRoundedRect(80, baseY - 30, 160, 24, 4);
+    table.fillRoundedRect(80, groundY - 30, 160, 24, 4);
 
     // Envelope on table (initially hidden, shown after flashlight)
     const env = this.add.graphics().setDepth(DEPTH_WORLD + 0.5).setAlpha(0);
     env.fillStyle(0xfff5cc);
-    env.fillRoundedRect(140, baseY - 50, 40, 26, 2);
+    env.fillRoundedRect(140, groundY - 50, 40, 26, 2);
     env.lineStyle(1, 0xaaa080);
-    env.strokeRoundedRect(140, baseY - 50, 40, 26, 2);
-    env.lineBetween(140, baseY - 50, 160, baseY - 37);
-    env.lineBetween(180, baseY - 50, 160, baseY - 37);
+    env.strokeRoundedRect(140, groundY - 50, 40, 26, 2);
+    env.lineBetween(140, groundY - 50, 160, groundY - 37);
+    env.lineBetween(180, groundY - 50, 160, groundY - 37);
     (this as any)._envelope = env;
-  }
-
-  private placeCharacter(x: number, baseY: number, textureKey: string, name: string, dw: number, dh: number): void {
-    if (this.textures.exists(textureKey)) {
-      const img = this.add.image(x, baseY - dh / 2, textureKey).setDepth(DEPTH_WORLD + 1);
-      charCropFrame0(img, textureKey, dw, dh);
-    } else {
-      const g = this.add.graphics().setDepth(DEPTH_WORLD + 1);
-      g.fillStyle(0x888888);
-      g.fillRoundedRect(x - dw / 4, baseY - dh, dw / 2, dh, 4);
-      g.fillEllipse(x, baseY - dh - 12, 22, 22);
-    }
-    this.add.text(x, baseY - dh - 14, name, {
-      fontSize: '10px', fontFamily: 'Arial', color: '#fffbe8',
-      stroke: '#000', strokeThickness: 2,
-    }).setOrigin(0.5, 1).setDepth(DEPTH_UI);
   }
 
   private buildTitle(): void {
@@ -158,7 +152,7 @@ export class C2Scene6 extends Phaser.Scene {
   }
 
   private advanceScene(): void {
-    this.gs.set('c2Progress', 6);  // Chapter2Scene will start C2MiniCrocodile
+    this.gs.set('c2Progress', 7);  // Chapter2Scene will start C2MiniCrocodile
     try { this.sound.stopAll(); } catch (_) {}
     this.cameras.main.fadeOut(500);
     this.cameras.main.once('camerafadeoutcomplete', () => {

@@ -22,6 +22,8 @@ import { MiniGameFlashlight }     from "./scenes/MiniGameFlashlight";
 import { MiniGameCrocodile }      from "./scenes/MiniGameCrocodile";
 import { MiniGameFirefly }        from "./scenes/MiniGameFirefly";
 import { MiniGameDossier }        from "./scenes/MiniGameDossier";
+import { MiniGameTrash }          from "./scenes/MiniGameTrash";
+import { MiniGameWeavingScene }   from "./scenes/MiniGameWeavingScene";
 // ── Endings ───────────────────────────────────────────────────────────────
 import { EndingRed }              from "./scenes/EndingRed";
 import { EndingBlack }            from "./scenes/EndingBlack";
@@ -77,6 +79,8 @@ const config: Phaser.Types.Core.GameConfig = {
     MiniGameCrocodile,      // standalone — vượt suối
     MiniGameFirefly,        // overlay — bắt đom đóm
     MiniGameDossier,        // overlay — xếp hồ sơ
+    MiniGameTrash,          // overlay — phân loại rác (Chapter 1)
+    MiniGameWeavingScene,   // overlay — dệt thổ cẩm (Chapter 1)
     // ── Endings ──────────────────────────────────────────────────────
     EndingRed,
     EndingBlack,
