@@ -25,6 +25,7 @@ export class Chapter1Scene extends Phaser.Scene {
   private inDialog = false;
   private _pendingNPC: NPC | null = null;
   private _lastDialogKey = '';
+  private _lastDialogResult: any = null;
 
   // Maps each dialog key to the follow-up action that runs after it finishes.
   // To add a new story beat: add one entry here — onDialogDone never needs to change.
@@ -64,14 +65,31 @@ export class Chapter1Scene extends Phaser.Scene {
     'scene_1_2_sew_loose':  (npc) => this.afterWeavingConclusion(npc),
     'scene_1_2_sew_medium': (npc) => this.afterWeavingConclusion(npc),
     'scene_1_2_sew_good':   (npc) => this.afterWeavingConclusion(npc),
-    'forest_gathering' : (npc) => {
+    'forest_gathering': (npc) => {
+      const scoreChange = this._lastDialogResult?.scoreChange ?? 0;
+      const resultKey = scoreChange >= 2 ? 'forest_gathering_result_good' : 'forest_gathering_result_bad';
       this.time.delayedCall(300, () => {
-          this.npcKbroi.show(1600)
-          this.startDialog('call_help' , this.npcKbroi)
-          this.npcKbroi.walkTo(1850 , 60 , () => {
-              this.npcKbroi.setDialogKey('scene_1_4')
-          })
-      })
+        this.startDialog(resultKey, npc);
+      });
+    },
+
+    'forest_gathering_result_good': (_npc) => {
+      this.time.delayedCall(300, () => {
+        this.npcKbroi.show(1600);
+        this.startDialog('call_help', this.npcKbroi);
+        this.npcKbroi.walkTo(1850, 60, () => {
+          this.npcKbroi.setDialogKey('scene_1_4');
+        });
+      });
+    },
+    'forest_gathering_result_bad': (_npc) => {
+      this.time.delayedCall(300, () => {
+        this.npcKbroi.show(1600);
+        this.startDialog('call_help', this.npcKbroi);
+        this.npcKbroi.walkTo(1850, 60, () => {
+          this.npcKbroi.setDialogKey('scene_1_4');
+        });
+      });
     },
 
     'scene_1_4_success' :(npc) =>{
@@ -597,14 +615,11 @@ export class Chapter1Scene extends Phaser.Scene {
   // Called by DialogScene via this.events.emit('dialog-done', result) when the player closes a conversation.
   // result may carry { scoreChange: number } or be undefined.
   private onDialogDone(result: any): void {
-    // Chapter1Scene was paused while DialogScene was active — resume it now.
     this.scene.resume();
-    // Re-enable the update() loop (it early-returns while inDialog is true).
     this.inDialog = false;
-    // Allow the player sprite to accept movement input again.
     this.player.unfreeze();
+    this._lastDialogResult = result;
 
-    // Only run follow-up logic when the dialog was started by interacting with an NPC.
     if (this._pendingNPC) {
       const npc = this._pendingNPC;
       const finishedKey = this._lastDialogKey;
