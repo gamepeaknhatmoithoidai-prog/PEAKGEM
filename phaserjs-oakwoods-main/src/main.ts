@@ -28,6 +28,7 @@ import { MiniGameWeavingScene }   from "./scenes/MiniGameWeavingScene";
 import { EndingRed }              from "./scenes/EndingRed";
 import { EndingBlack }            from "./scenes/EndingBlack";
 import { EndingYellow }           from "./scenes/EndingYellow";
+import { MoralMirrorScene }       from "./scenes/MoralMirrorScene";
 import { EndScreen }              from "./scenes/EndScreen";
 // ── Shared overlay scenes ─────────────────────────────────────────────────
 import { UIScene }                from "./scenes/UIScene";
@@ -82,6 +83,7 @@ const config: Phaser.Types.Core.GameConfig = {
     MiniGameTrash,          // overlay — phân loại rác (Chapter 1)
     MiniGameWeavingScene,   // overlay — dệt thổ cẩm (Chapter 1)
     // ── Endings ──────────────────────────────────────────────────────
+    MoralMirrorScene,
     EndingRed,
     EndingBlack,
     EndingYellow,

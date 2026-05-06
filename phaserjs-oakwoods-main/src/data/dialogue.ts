@@ -626,6 +626,22 @@ export const DIALOGS: Record<string, Dialog> = {
       text: 'À — nếu anh đã nói gì với ông Thắng tối qua... tôi không cần biết. Nhưng từ giờ hãy cẩn thận hơn.' },
     { speaker: 'Dẫn chuyện',
       text: 'Lan trao cho {name} một USB và bản báo cáo sinh thái dày. Rồi biến mất — đi làm phần của mình.' },
+    { speaker: 'K\'Brơi', portrait: 'char-kbroi',
+      text: '[nhìn {name} một lúc. Không nói gì. Quay sang nhìn ra cửa sổ.]' },
+  ],
+
+  // Echo: K'Brơi cảm nhận khoảng cách sau bribe_accept
+  'c2s9-kbroi-echo-bribe': [
+    { speaker: 'Dẫn chuyện',
+      text: 'K\'Brơi đi trước. Khoảng cách giữa hai người hôm nay rộng hơn hôm qua một chút.' },
+  ],
+
+  // Echo: Nội tâm trước khi gặp Hùng (chỉ khi bribe_accept)
+  'c2s10-echo-before-hung': [
+    { speaker: 'Dẫn chuyện',
+      text: 'Trước khi Hùng bước vào, {name} nhớ lại cuộc trò chuyện tối qua với ông Thắng.' },
+    { speaker: 'Dẫn chuyện',
+      text: 'Hùng làm điều sai vì gia đình. {name} đã làm gì và vì lý do gì?' },
   ],
 
   // ── CẢNH 2.10: HÙNG THÚ NHẬN — ĐỈNH ĐIỂM CẢM XÚC ───────────────────
@@ -652,15 +668,46 @@ export const DIALOGS: Record<string, Dialog> = {
   ],
 
   // ── CẢNH 2.11: TIỄN BIỆT & KẾT CHƯƠNG ───────────────────────────────
-  'c2s11-farewell': [
+  // KEY A: Người chơi không nhận hối lộ (bribe_refuse hoặc bribe_question)
+  'c2s11-farewell-honest': [
     { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
-      text: 'Con à. Ông hỏi một câu thôi.\n\nCon về thành phố — con mang theo gì?' },
+      text: 'Con à. Ông hỏi một câu thôi. Con về thành phố, con mang theo gì?' },
     { speaker: '{name}',
-      text: 'Con... con mang theo sự thật, Ama.' },
+      text: 'Con mang theo sự thật, Ama.' },
     { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
       text: 'Thì mang cho đúng chỗ.' },
     { speaker: 'Dẫn chuyện',
-      text: 'K\'Brơi đứng sau Ama K\'Nơi. Không nói gì.\n\nChỉ nhìn {name} — lần đầu tiên ánh mắt không còn cảnh giác.' },
+      text: 'K\'Brơi đứng sau Ama K\'Nơi. Không nói gì. Chỉ nhìn {name}, lần đầu tiên ánh mắt không còn cảnh giác.' },
+  ],
+
+  // KEY B: Nhận hối lộ nhưng ending red/yellow (chuộc lỗi)
+  'c2s11-farewell-bribed': [
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
+      text: 'Con à. Ông hỏi một câu thôi. Con về thành phố, con mang theo gì?' },
+    { speaker: '{name}',
+      text: '...' },
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
+      text: 'Ông già rồi. Ông biết khi người ta do dự trả lời câu đó.' },
+    { speaker: '{name}',
+      text: 'Con đã sai một lần ở đây, Ama. Nhưng con không kết thúc ở đó.' },
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
+      text: '[im lặng lâu]\nRừng cũng vậy. Nó bị thương nhiều lần. Nhưng nó không kết thúc ở vết thương.' },
+    { speaker: 'Dẫn chuyện',
+      text: 'K\'Brơi đứng sau Ama K\'Nơi. Ánh mắt cậu không hoàn toàn bỏ qua. Nhưng cũng không còn lạnh.' },
+  ],
+
+  // KEY C: Nhận hối lộ + ending black (im lặng đến cùng)
+  'c2s11-farewell-silent': [
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
+      text: 'Con à. Ông hỏi một câu thôi. Con về thành phố, con mang theo gì?' },
+    { speaker: '{name}',
+      text: '...' },
+    { speaker: 'Ama K\'Nơi', portrait: 'char-amaknoi',
+      text: '[nhìn {name} lâu, không nói thêm]' },
+    { speaker: 'Dẫn chuyện',
+      text: 'K\'Brơi không nhìn {name}. Cậu nhìn ra phía rừng.' },
+    { speaker: 'Dẫn chuyện',
+      text: '{name} rời làng. Không ai ra tiễn đến cổng.' },
   ],
 
   // ══════════════════════════════════════════════════════════════════════

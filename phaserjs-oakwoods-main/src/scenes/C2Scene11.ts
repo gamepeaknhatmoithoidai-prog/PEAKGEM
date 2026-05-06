@@ -1,9 +1,8 @@
 /**
  * C2Scene11 — Khoảnh Khắc Quyết Định Cuối
  *
- * Flow: farewell dialogue (c2s11-farewell) → fullscreen 3-choice popup
- *       → store finalChoice → start EndingRed / EndingBlack / EndingYellow
- *       (does NOT return to Chapter2Scene)
+ * Flow: fullscreen 3-choice popup → store finalChoice
+ *       → farewell dialogue variant → MoralMirrorScene → Ending
  */
 import Phaser from 'phaser';
 import { GS } from '../data/GameState';
@@ -31,7 +30,8 @@ export class C2Scene11 extends Phaser.Scene {
     this.events.on('dialog-done', this.onDialogDone, this);
 
     this.cameras.main.fadeIn(700);
-    this.time.delayedCall(800, () => this.startDialog('c2s11-farewell'));
+    // Show final choice popup first (farewell comes AFTER choice is made)
+    this.time.delayedCall(800, () => this.showFinalChoice());
 
     try { this.sound.play('forest-ambient', { loop: true, volume: 0.06 }); } catch (_) {}
   }
@@ -57,7 +57,7 @@ export class C2Scene11 extends Phaser.Scene {
     g.fillTriangle(W / 2 - W * 0.08, H, W / 2 + W * 0.08, H, W / 2 + W * 0.25, H * 0.70);
     g.fillTriangle(W / 2 - W * 0.08, H, W / 2 - W * 0.25, H * 0.70, W / 2 + W * 0.25, H * 0.70);
 
-    // Trees lining both sides — tall and golden
+    // Trees lining both sides
     const trees = this.add.graphics().setDepth(DEPTH_BG + 0.5);
     trees.fillStyle(0x1e3d0a);
     for (let x = 0; x < W * 0.25; x += 65) {
@@ -114,9 +114,14 @@ export class C2Scene11 extends Phaser.Scene {
 
   private onDialogDone(): void {
     this.scene.resume();
-    if (!this.choiceDone) {
-      this.time.delayedCall(600, () => this.showFinalChoice());
-    }
+    // Farewell dialog done → transition to MoralMirrorScene
+    const choice = this.gs.get('finalChoice') || 'black';
+    try { this.sound.stopAll(); } catch (_) {}
+    this.cameras.main.fadeOut(800);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.stop('UIScene');
+      this.scene.start('MoralMirrorScene', { endingType: choice });
+    });
   }
 
   // ── Final choice popup ────────────────────────────────────────────────
@@ -202,15 +207,25 @@ export class C2Scene11 extends Phaser.Scene {
     this.choiceDone = true;
     this.gs.set('finalChoice', choice);
 
-    const endingKey = { red: 'EndingRed', black: 'EndingBlack', yellow: 'EndingYellow' }[choice];
-    if (!endingKey) return;
-
-    try { this.sound.stopAll(); } catch (_) {}
-    this.cameras.main.fadeOut(800);
-    this.cameras.main.once('camerafadeoutcomplete', () => {
-      this.scene.stop('UIScene');
-      this.scene.start(endingKey);
+    // Clear the popup overlay (destroy all depth >= 20)
+    this.children.each((child: Phaser.GameObjects.GameObject) => {
+      if ((child as any).depth >= 20) child.destroy();
     });
+
+    // Determine farewell dialogue variant
+    const decisions = this.gs.get('decisions') || [];
+    const hasBribe = decisions.includes('bribe_accept');
+
+    let farewellKey: string;
+    if (!hasBribe) {
+      farewellKey = 'c2s11-farewell-honest';
+    } else if (choice === 'red' || choice === 'yellow') {
+      farewellKey = 'c2s11-farewell-bribed';
+    } else {
+      farewellKey = 'c2s11-farewell-silent';
+    }
+
+    this.time.delayedCall(600, () => this.startDialog(farewellKey));
   }
 
   shutdown(): void {

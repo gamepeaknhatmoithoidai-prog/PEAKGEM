@@ -11,6 +11,7 @@
 import Phaser from 'phaser';
 import { GS } from '../data/GameState';
 import { W, H } from '../constants';
+import { generateAndDownloadJourneyLog, JourneyLogData } from '../utils/JourneyLog';
 
 interface LeaderEntry { name: string; score: number; choice: string }
 
@@ -41,6 +42,7 @@ export class EndScreen extends Phaser.Scene {
     this.buildBackground();
     this.buildScoreSection();
     this.buildStatsSection();
+    this.buildJournalButton();
     this.buildFactsSection();
     this.buildButtons();
 
@@ -126,6 +128,92 @@ export class EndScreen extends Phaser.Scene {
         fontSize: '10px', fontFamily: 'Arial', color: '#c8d8aa',
       });
     });
+  }
+
+  // ── Journal download button ──────────────────────────────────────────
+  private buildJournalButton(): void {
+    const btnY = 222, btnW = W - 68, btnH = 30;
+    const btnX = 34;
+
+    // Outline style button
+    const bg = this.add.graphics().setDepth(5).setAlpha(0);
+    bg.lineStyle(1.5, 0x4caf50, 0.8);
+    bg.strokeRoundedRect(btnX, btnY, btnW, btnH, 6);
+
+    const txt = this.add.text(btnX + btnW / 2, btnY + btnH / 2,
+      '📓 Lưu Nhật Ký Hành Trình', {
+      fontSize: '12px', fontFamily: 'Arial', color: '#4caf50',
+      stroke: '#000', strokeThickness: 1,
+    }).setOrigin(0.5).setDepth(6).setAlpha(0);
+
+    const zone = this.add.zone(btnX + btnW / 2, btnY + btnH / 2, btnW, btnH)
+      .setInteractive().setDepth(7);
+
+    // Show after fadeIn animation completes (~700ms + buffer)
+    this.time.delayedCall(900, () => {
+      this.tweens.add({ targets: [bg, txt], alpha: 1, duration: 400 });
+    });
+
+    zone.on('pointerover', () => {
+      bg.clear();
+      bg.fillStyle(0x4caf50, 0.15);
+      bg.fillRoundedRect(btnX, btnY, btnW, btnH, 6);
+      bg.lineStyle(1.5, 0x4caf50, 1);
+      bg.strokeRoundedRect(btnX, btnY, btnW, btnH, 6);
+    });
+    zone.on('pointerout', () => {
+      bg.clear();
+      bg.lineStyle(1.5, 0x4caf50, 0.8);
+      bg.strokeRoundedRect(btnX, btnY, btnW, btnH, 6);
+    });
+    zone.on('pointerdown', () => this.downloadJournal());
+  }
+
+  private downloadJournal(): void {
+    const gs = this.gs;
+    const decisions = gs.get('decisions') || [];
+    const findDec = (candidates: string[], fallback: string): string => {
+      for (const c of candidates) {
+        if (decisions.includes(c)) return c;
+      }
+      return fallback;
+    };
+
+    const choice = gs.get('finalChoice') || 'black';
+    const endingLabels: Record<string, string> = {
+      red: 'Phơi Bày Sự Thật',
+      yellow: 'Thỏa Hiệp',
+      black: 'Im Lặng',
+    };
+
+    const data: JourneyLogData = {
+      playerName: gs.get('playerName') || 'Thuận',
+      endingType: choice as 'red' | 'yellow' | 'black',
+      endingLabel: endingLabels[choice] || 'Im Lặng',
+      score: gs.get('score') || 0,
+      trust: gs.get('trust') || 0,
+      decisions: {
+        gate:    findDec(['gate_humble', 'gate_pushy', 'gate_stubborn'], 'gate_humble'),
+        ch1Stay: findDec(['ch1_stay', 'ch1_unsure'], 'ch1_stay'),
+        thang:   findDec(['agree_thang', 'question_thang', 'confront_thang'], 'agree_thang'),
+        bribe:   findDec(['bribe_accept', 'bribe_refuse', 'bribe_question'], 'bribe_refuse'),
+        hung:    findDec(['hung_trust', 'hung_confront'], 'hung_trust'),
+      },
+      quizResults: { correct: 0, total: 0 },
+      miniGameScores: {
+        trash:      gs.get('trashSortScore') || 0,
+        weaving:    0,
+        tea:        gs.get('teaScore') || 0,
+        flashlight: gs.get('flashlightScore') || 0,
+        crocodile:  gs.get('crocodileScore') || 0,
+        firefly:    gs.get('firefliesCount') || 0,
+        dossier:    gs.get('dossierScore') || 0,
+      },
+      animalSaved: gs.get('animalSaved') || false,
+      generatedAt: new Date().toISOString(),
+    };
+
+    generateAndDownloadJourneyLog(data);
   }
 
   // ── Facts ─────────────────────────────────────────────────────────────

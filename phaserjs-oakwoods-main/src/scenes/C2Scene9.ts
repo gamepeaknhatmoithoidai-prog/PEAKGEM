@@ -13,11 +13,13 @@ const SCENE_KEY = 'C2S9Scene';
 
 export class C2Scene9 extends Phaser.Scene {
   private gs!: GS;
+  private dialogStep = 0;
 
   constructor() { super(SCENE_KEY); }
 
   create(): void {
     this.gs = new GS(this.registry);
+    this.dialogStep = 0;
 
     this.physics.world.gravity.y = 0;
 
@@ -115,6 +117,18 @@ export class C2Scene9 extends Phaser.Scene {
 
   private onDialogDone(): void {
     this.scene.resume();
+    this.dialogStep++;
+
+    // After main Lan dialog (step 1): trigger echo if bribe_accept
+    if (this.dialogStep === 1) {
+      const decisions = this.gs.get('decisions') || [];
+      if (decisions.includes('bribe_accept')) {
+        this.time.delayedCall(400, () => this.startDialog('c2s9-kbroi-echo-bribe'));
+        return;
+      }
+    }
+
+    // After echo dialog (step 2) or if no echo needed: advance
     this.gs.addInventory('usb-data');
     this.gs.addScore(20);
     this.game.events.emit('notify', '💾 Nhận được: USB dữ liệu + Báo cáo khoa học! +20 điểm', '#88ff66');

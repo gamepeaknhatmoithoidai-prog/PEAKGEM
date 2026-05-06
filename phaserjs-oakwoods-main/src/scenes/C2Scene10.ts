@@ -32,7 +32,15 @@ export class C2Scene10 extends Phaser.Scene {
     this.events.on('minigame-done', this.onMiniGameDone, this);
 
     this.cameras.main.fadeIn(500);
-    this.time.delayedCall(600, () => this.startDialog('c2s10-hung'));
+
+    // Check if bribe_accept: show echo before Hùng dialog
+    const decisions = this.gs.get('decisions') || [];
+    if (decisions.includes('bribe_accept')) {
+      this.time.delayedCall(600, () => this.startDialog('c2s10-echo-before-hung'));
+    } else {
+      this.step = 1; // skip echo step
+      this.time.delayedCall(600, () => this.startDialog('c2s10-hung'));
+    }
 
     try { this.sound.play('forest-ambient', { loop: true, volume: 0.07 }); } catch (_) {}
   }
@@ -110,6 +118,9 @@ export class C2Scene10 extends Phaser.Scene {
     this.scene.resume();
     this.step++;
     if (this.step === 1) {
+      // Echo done → now launch Hùng dialog
+      this.time.delayedCall(400, () => this.startDialog('c2s10-hung'));
+    } else if (this.step === 2) {
       // Hùng confessed → launch dossier mini-game
       this.time.delayedCall(400, () => this.launchMiniGame('MiniGameDossier'));
     }
